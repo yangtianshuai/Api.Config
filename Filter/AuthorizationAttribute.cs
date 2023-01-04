@@ -37,7 +37,7 @@ namespace Api.Config
                 }
             }
 
-            string token = context.HttpContext.GetToken();
+            var token = context.HttpContext.GetToken();
             if (token == null)
             {
                 if (context.HttpContext.PassCas())
@@ -57,7 +57,7 @@ namespace Api.Config
                     return;
                 }
             }
-            Session session = _session.Get<Session>(token);
+            var session = _session.Get<Session>(token);
             if (session == null)
             {                
                 context.HttpContext.NoAuthorization();

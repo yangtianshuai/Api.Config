@@ -19,8 +19,8 @@ namespace Api.Config
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             //Session服务
-            services.AddScoped<ISessionService, SessionService>();
-            services.AddScoped<ServerSession>();
+            services.AddSingleton<ISessionService, SessionService>();
+            services.AddSingleton<ServerSession>();
 
             return services;
         }
@@ -45,7 +45,7 @@ namespace Api.Config
                 }
                 if (sessionOption.Service != null)
                 {
-                    services.AddScoped<ServerSession>();
+                    services.AddSingleton<ServerSession>();
 
                     if (sessionOption.TimeSpan != null && sessionOption.TimeSpan != TimeSpan.MinValue)
                     {
@@ -56,7 +56,7 @@ namespace Api.Config
                         ServerSession.Span = TimeSpan.FromHours(8);
                     }
                     //自定义Session服务
-                    services.AddScoped(typeof(ISessionService), sessionOption.Service);
+                    services.AddSingleton(typeof(ISessionService), sessionOption.Service);
                     return services;
                 }
             }

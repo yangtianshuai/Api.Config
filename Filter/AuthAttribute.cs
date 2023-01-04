@@ -1,4 +1,5 @@
 ﻿using Api.Config.Filter;
+using Api.Config.Proxy;
 using Api.Config.Setting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -63,15 +64,16 @@ namespace Api.Config
             {
                 var open = Attrs.FirstOrDefault(t => t.GetType().Equals(typeof(OpenAttribute)));
                 if (open != null)
-                {
-                    var _apps = ((OpenAttribute)open).GetApps();
+                {                    
+                    var route = context.HttpContext.GetRoute();
+                    var _apps = ((OpenAttribute)open).GetApps(route);
                     if (context.HttpContext.OpenCheck(_apps))
                     {
                         NoAuthAttr = true;
+                        WhiteListContain = true;
                     }
                 }
-            }
-            
+            }            
         }        
     }
 }

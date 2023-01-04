@@ -14,12 +14,17 @@ namespace Api.Config
         public static string GetBaseUrl(this HttpContext context)
         {
             var http = $"{context.Request.Scheme}://{context.Request.Host}";
-            var _virtual = AppSetting.GetSetting("Virtual");
+            var _virtual = context.GetVirtualPath();
             if (_virtual != null && _virtual.Length > 0)
             {
                 http = http + _virtual;
             }
             return http;
+        }
+
+        public static string GetVirtualPath(this HttpContext context)
+        {           
+            return AppSetting.GetSetting("Virtual"); ;
         }
 
         public static Dictionary<string, string> GetQueryString(this HttpContext context,string url)

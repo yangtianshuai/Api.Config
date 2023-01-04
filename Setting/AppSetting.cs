@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 
 namespace Api.Config.Setting
 {
     public partial class AppSetting
     {
+        internal static string ConfigPath { get; set; }
         internal static IConfiguration Configuration { get; set; }
 
         /// <summary>
@@ -38,6 +40,40 @@ namespace Api.Config.Setting
                 return GetSetting2<T>(key);
             }
             return default(T);
+        }
+
+        public static bool Set<T>(string key, T value) where T : class
+        {
+            if (string.IsNullOrEmpty(AppSetting.ConfigPath))
+            {
+                return false;
+            }
+            string text = System.IO.File.ReadAllText(AppSetting.ConfigPath);
+            var json = JObject.Parse(text);
+            var keys = key.Split(':');
+            var jtoken = JToken.FromObject(value);
+            if (keys.Length == 1)
+            {              
+                json[keys[0]] = jtoken;
+            }
+            else if(keys.Length == 2)
+            {
+                json[keys[0]][keys[1]] = jtoken;
+            }
+            else if (keys.Length == 3)
+            {
+                json[keys[0]][keys[1]][keys[2]] = jtoken;
+            }
+            else if (keys.Length == 4)
+            {
+                json[keys[0]][keys[1]][keys[2]][keys[3]] = jtoken;
+            }
+            else
+            {
+                return false;
+            }
+            System.IO.File.WriteAllText(AppSetting.ConfigPath, json.ToString());
+            return true;
         }
     }
 }

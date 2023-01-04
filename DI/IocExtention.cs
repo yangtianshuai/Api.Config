@@ -27,7 +27,7 @@ namespace Api.Config
             {
                 return;
             }
-            var jsonServices = JObject.Parse(File.ReadAllText(jsonFile))[name];
+            var jsonServices = JObject.Parse(System.IO.File.ReadAllText(jsonFile))[name];
             SetDI(services, jsonServices);
         }
         /// <summary>
@@ -46,7 +46,7 @@ namespace Api.Config
 
             foreach (var file in files)
             {
-                var jsonServices = JObject.Parse(File.ReadAllText(file));
+                var jsonServices = JObject.Parse(System.IO.File.ReadAllText(file));
 
                 SetDI(services, jsonServices[jsonServices.First.Path]);
             }
@@ -85,13 +85,19 @@ namespace Api.Config
             }
             var iocOption = new IocOption();
             option(iocOption);//客户端类型注入     
-
-            var definedTypes = Assembly
+            var assemblys = Assembly
                         .GetEntryAssembly()//获取默认程序集
                         .GetReferencedAssemblies()//获取所有引用程序集
-                        .Select(Assembly.Load)
-                        .SelectMany(y => y.DefinedTypes).ToList();
-
+                        .Select(Assembly.Load);
+            var definedTypes = new List<TypeInfo>();
+            foreach (var assembly in assemblys)
+            {
+                try
+                {
+                    definedTypes.AddRange(assembly.DefinedTypes.ToList());
+                }
+                catch { }
+            }
             //加入本地程序集内容
             definedTypes.AddRange(Assembly.GetEntryAssembly().DefinedTypes);
             foreach(var assembly in iocOption.Assemblies)

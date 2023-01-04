@@ -17,15 +17,17 @@ namespace Api.Config
         /// 配置DI
         /// </summary>
         /// <param name="services">服务集合</param>      
-        public static IServiceCollection AddSetting(this IServiceCollection services, IConfiguration config, string evn = null)
+        public static IServiceCollection AddSetting(this IServiceCollection services, IConfiguration config, string evn = null, string file_path = null)
         {
             AppSetting.Configuration = config;
+            AppSetting.ConfigPath = file_path;
             if (evn != null)
             {
                 AppSetting.SetEnv(evn);
             }
             return services;
         }
+
         /// <summary>
         /// 配置DI
         /// </summary>

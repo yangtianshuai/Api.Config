@@ -34,25 +34,9 @@ namespace Api.Config
             options.Storage.Service = service;
 
             services.AddSingleton(typeof(StorageOptions), options);
-
-            ////普通上传URL
-            //MvcRouter.Add(options.Storage.GetUrl(), async context =>
-            //{
-            //    await UploadAsync(context, options.Storage);
-            //});
-            ////分片上传URL
-            //MvcRouter.Add(options.Storage.GetSliceUrl(), async context =>
-            //{
-            //    await UploadSliceAsync(context, options.Storage);
-            //});
             //启动存储守护者
             StorageHost.Run(options.Storage);
             return services;
-        }
-
-        public static void UseStorage(this IApplicationBuilder builder)
-        {
-            builder.UseMiddleware<UploadMiddleware>();
         }
     }
 }

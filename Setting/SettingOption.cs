@@ -13,6 +13,7 @@ namespace Api.Config.Setting
         /// </summary>
         public Func<SettingContext,string> DowLoad { get; set; }
         
+        
       
         public string Environment
         {

@@ -13,7 +13,7 @@ namespace Api.Config
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         internal static TimeSpan Span = TimeSpan.FromHours(8);
-
+        
         /// <summary>
         /// ServerSession
         /// </summary>
@@ -24,6 +24,11 @@ namespace Api.Config
         {
             _httpContextAccessor = httpContextAccessor;
             _sessionService = sessionService;
+        }
+
+        public ISessionService GetService()
+        {
+            return _sessionService;
         }
 
         /// <summary>

@@ -21,10 +21,9 @@ namespace Api.Config
             var options = new CasOptions();
             if (option != null)
             {                
-                option(options);
-                services.AddSingleton(typeof(CasOptions), options);
+                option(options);                
             }
-
+            services.AddSingleton(typeof(CasOptions), options);
             //设置注入项目
             if (options.LogoutPath == null)
             {               
