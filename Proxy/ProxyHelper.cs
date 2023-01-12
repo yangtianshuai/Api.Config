@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Api.Config.Proxy
@@ -22,7 +23,9 @@ namespace Api.Config.Proxy
 			var request = CopyRequest(context, uri);
 			if (session != null)
 			{
-				request.Headers.Add(proxy_session, JsonConvert.SerializeObject(session));
+				var content = JsonConvert.SerializeObject(session);				
+				content = Convert.ToBase64String(Encoding.UTF8.GetBytes(content));
+				request.Headers.Add(proxy_session, content);
 			}
 			request.Headers.SetOpenSign(context.GetOpenSign());
 
@@ -91,7 +94,8 @@ namespace Api.Config.Proxy
         {			
             if (context.Request.Headers.ContainsKey(proxy_session))
             {
-				var session = context.Request.Headers[proxy_session].ToString();
+				var session = context.Request.Headers[proxy_session].ToString();				
+				session = Encoding.UTF8.GetString(Convert.FromBase64String(session));
 				return JsonConvert.DeserializeObject<T>(session);
             }
 			return default(T);

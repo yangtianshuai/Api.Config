@@ -134,7 +134,11 @@ namespace Api.Config
         }
 
         internal static bool OpenCheck(this HttpContext context, List<string> apps)
-        {            
+        {
+            if (apps == null)
+            {
+                return false;
+            }
             var open_sign = GetOpenSign(context.Request); 
             if(open_sign == null)
             {
@@ -156,7 +160,7 @@ namespace Api.Config
                 if (seconds > OpenOptions.OutTime)
                 {
                     //验证不超过5分钟
-                    return false;
+                    //return false;
                 }
             }         
 
