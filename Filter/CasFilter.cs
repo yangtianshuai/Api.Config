@@ -45,6 +45,14 @@ namespace Api.Config
             }
 
             var request = context.HttpContext.GetCasRequest(_options.Mode);
+            if(request.Query.ContainsKey(HttpExtention.ACCESS_TOKEN_KEY))
+            {
+                if (AccessTokens.Contains(request.Query[HttpExtention.ACCESS_TOKEN_KEY]))
+                {
+                    WhiteListContain = true;
+                    return;
+                }            
+            }
             request.ClientIP = ClientIp;
             _casHandler.SetRequest(request);//设置请求
             request.RequestHost = context.HttpContext.GetBaseUrl();

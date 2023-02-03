@@ -22,7 +22,7 @@ namespace Api.Config
             return http;
         }
 
-        private static string access_token_key = "access_token";
+        public static string ACCESS_TOKEN_KEY = "access_token";
 
         /// <summary>
         /// 获取基本请求路径
@@ -30,15 +30,15 @@ namespace Api.Config
         /// <param name="services"></param>
         /// <returns></returns>
         public static string GetAccessToken(this HttpRequest request)
-        {
-            if (request.Headers.ContainsKey(access_token_key))
+        {            
+            if (request.Headers.ContainsKey(ACCESS_TOKEN_KEY))
             {
                 return request.Headers["access_token"].ToString();
             }
-            if (request.Query.ContainsKey(access_token_key))
+            if (request.Query.ContainsKey(ACCESS_TOKEN_KEY))
             {
                 return request.Query["access_token"].ToString();
-            }
+            }            
             return null;
         }
 

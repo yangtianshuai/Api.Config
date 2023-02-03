@@ -27,6 +27,7 @@ namespace Api.Config
         internal string ClientIp { get; set; }        
 
         internal object[] Attrs { get; set; }
+        internal List<string> AccessTokens { get; set; }
 
         public virtual void OnActionExecuted(ActionExecutedContext context)
         {
@@ -47,8 +48,8 @@ namespace Api.Config
             var access_token = context.HttpContext.Request.GetAccessToken();
             if (!string.IsNullOrEmpty(access_token))
             {
-                var access_tokens = AppSetting.GetSetting<List<string>>("AccessToken");                
-                if (access_tokens.Contains(access_token))
+                AccessTokens = AppSetting.GetSetting<List<string>>("AccessToken");                
+                if (AccessTokens.Contains(access_token))
                 {
                     WhiteListContain = true;
                 }
