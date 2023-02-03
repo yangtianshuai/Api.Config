@@ -5,13 +5,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Api.Config
 {
     public abstract class AuthAttribute : IActionFilter
-    {
+    {       
         /// <summary>
         /// 白名单包含？
         /// </summary>
@@ -39,6 +40,15 @@ namespace Api.Config
             if (hosts != null && hosts.Length > 0)
             {
                 if (hosts.Split(',').Contains(ClientIp))
+                {
+                    WhiteListContain = true;
+                }
+            }
+            var access_token = context.HttpContext.Request.GetAccessToken();
+            if (!string.IsNullOrEmpty(access_token))
+            {
+                var access_tokens = AppSetting.GetSetting<List<string>>("AccessToken");                
+                if (access_tokens.Contains(access_token))
                 {
                     WhiteListContain = true;
                 }

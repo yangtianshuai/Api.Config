@@ -48,16 +48,12 @@ namespace Api.Config
                             success = result.Code == 1;
                             res = result.Data != null ? result.Data.ToString() : result.Message;
                         }
-                    }
-                    else
-                    {
-                        success = false;
-                        res = "无法获取到结果";
-                    }
+                    }                    
                 }
                 catch
                 {                    
                     res = "未获取到结果，返回的数据无法序列化";
+                    success = false;
                 }
 
                 if (AppSetting.Environment == AppEnvironment.Production)

@@ -22,6 +22,26 @@ namespace Api.Config
             return http;
         }
 
+        private static string access_token_key = "access_token";
+
+        /// <summary>
+        /// 获取基本请求路径
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static string GetAccessToken(this HttpRequest request)
+        {
+            if (request.Headers.ContainsKey(access_token_key))
+            {
+                return request.Headers["access_token"].ToString();
+            }
+            if (request.Query.ContainsKey(access_token_key))
+            {
+                return request.Query["access_token"].ToString();
+            }
+            return null;
+        }
+
         public static string GetVirtualPath(this HttpContext context)
         {           
             return AppSetting.GetSetting("Virtual"); ;
