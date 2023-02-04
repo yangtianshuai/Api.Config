@@ -45,10 +45,10 @@ namespace Api.Config
                     WhiteListContain = true;
                 }
             }
+            AccessTokens = AppSetting.GetSetting<List<string>>("AccessToken");
             var access_token = context.HttpContext.Request.GetAccessToken();
             if (!string.IsNullOrEmpty(access_token))
-            {
-                AccessTokens = AppSetting.GetSetting<List<string>>("AccessToken");                
+            {                               
                 if (AccessTokens.Contains(access_token))
                 {
                     WhiteListContain = true;

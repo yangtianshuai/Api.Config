@@ -52,7 +52,7 @@ namespace Api.Config
             }
             else
             {
-                if(token == context.HttpContext.Response.GetToken())
+                if(!string.IsNullOrEmpty(context.HttpContext.Response.GetToken()))
                 {
                     return;
                 }

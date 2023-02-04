@@ -47,9 +47,10 @@ namespace Api.Config
             var request = context.HttpContext.GetCasRequest(_options.Mode);
             if(request.Query.ContainsKey(HttpExtention.ACCESS_TOKEN_KEY))
             {
-                if (AccessTokens.Contains(request.Query[HttpExtention.ACCESS_TOKEN_KEY]))
+                var access_token = request.Query[HttpExtention.ACCESS_TOKEN_KEY];
+                if (AccessTokens.Contains(access_token))
                 {
-                    WhiteListContain = true;
+                    context.HttpContext.Response.SetToken(access_token);
                     return;
                 }            
             }
