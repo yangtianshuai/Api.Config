@@ -24,6 +24,12 @@ namespace Api.Config
         public virtual Task ValidateComplate(CasCookie cookie) { return Task.CompletedTask; }
 
         public virtual Task LogoutComplate(CasCookie cookie) { return Task.CompletedTask; }
+        /// <summary>
+        /// 访问控制验证
+        /// </summary>
+        /// <param name="access_token"></param>
+        /// <returns></returns>
+        public virtual bool AccessValidate(string access_token) { return false; }
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
@@ -45,10 +51,10 @@ namespace Api.Config
             }
 
             var request = context.HttpContext.GetCasRequest(_options.Mode);
-            if(request.Query.ContainsKey(HttpExtention.ACCESS_TOKEN_KEY))
+            if (request.Query.ContainsKey(HttpExtention.ACCESS_TOKEN_KEY))
             {
                 var access_token = request.Query[HttpExtention.ACCESS_TOKEN_KEY];
-                if (AccessTokens.Contains(access_token))
+                if (AccessValidate(access_token) || AccessTokens.Contains(access_token))
                 {
                     context.HttpContext.Response.SetToken(access_token);
                     return;
