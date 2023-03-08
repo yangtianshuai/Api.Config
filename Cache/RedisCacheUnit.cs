@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Api.Config.Cache
 {
-    public class RedisCacheUnit : CacheUnit
+    public class RedisCacheUnit : ICacheUnit
     {
         private readonly IDistributedCache _cache;
         private JsonSerializerSettings setting;
@@ -22,7 +22,7 @@ namespace Api.Config.Cache
             setting.DateFormatString = "yyyy-MM-dd HH:mm:ss";
         }
 
-        public override bool Clear(string key)
+        public bool Clear(string key)
         {
             try
             {
@@ -35,9 +35,9 @@ namespace Api.Config.Cache
             }
         }
 
-        public override async Task<bool> ClearAsync(string key)
-        {
-            if (Contain(key))
+        public async Task<bool> ClearAsync(string key)
+        {            
+            if (await _cache.GetAsync(key) != null)
             {
                 await _cache.RemoveAsync(key);
                 return true;
@@ -45,7 +45,7 @@ namespace Api.Config.Cache
             return false;
         }
 
-        public override T Get<T>(string key)
+        public T Get<T>(string key)
         {
             var buffer = _cache.Get(key);
             if (buffer != null)
@@ -56,7 +56,7 @@ namespace Api.Config.Cache
             return default(T);
         }
 
-        public override async Task<T> GetAsync<T>(string key)
+        public async Task<T> GetAsync<T>(string key)
         {
             var buffer = await _cache.GetAsync(key);
             if (buffer != null)
@@ -67,7 +67,7 @@ namespace Api.Config.Cache
             return default(T);
         }
 
-        public override bool Set(string key, object value, TimeSpan? timeSpan = null)
+        public bool Set(string key, object value, TimeSpan? timeSpan = null)
         {
             if (timeSpan == null || timeSpan == TimeSpan.MinValue)
             {
@@ -83,7 +83,7 @@ namespace Api.Config.Cache
             return true;
         }
 
-        public override async Task<bool> SetAsync(string key, object value, TimeSpan? timeSpan = null)
+        public async Task<bool> SetAsync(string key, object value, TimeSpan? timeSpan = null)
         {
             if (timeSpan == null || timeSpan == TimeSpan.MinValue)
             {

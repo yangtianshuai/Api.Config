@@ -34,12 +34,17 @@ namespace Api.Config.Log
             var dirctory = Path.Combine(Directory.GetCurrentDirectory(), dir_path);
 
             var list = new List<string>();
-            string[] files = Directory.GetFiles(dirctory);
 
-            foreach (var file in files)
-            {
-                list.Add(file.Replace(dirctory, ""));
-            }
+            if (Directory.Exists(dirctory))
+            {                
+                string[] files = Directory.GetFiles(dirctory);
+
+                foreach (var file in files)
+                {
+                    string file_name = file.Replace(dirctory, "").Replace("\\","");
+                    list.Add(file_name);
+                }
+            }            
             result.Data = list;
             return result.ToJson();
         }

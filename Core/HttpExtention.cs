@@ -161,6 +161,6 @@ namespace Api.Config
                 }
             }
             response.Headers[_key] = content;
-        }
+        }        
     }
 }

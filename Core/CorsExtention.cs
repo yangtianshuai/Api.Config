@@ -15,18 +15,36 @@ namespace Api.Config
         public static IServiceCollection AddCors2(this IServiceCollection services)
         {
             var allowOrigins = AppSetting.GetSetting("AllowOrigins");
-            var origins = new string[] { "*" };
-            if (allowOrigins != null)
+            string[] origins;
+            if (string.IsNullOrEmpty(allowOrigins))
+            {
+                origins = AppSetting.GetSetting<string[]>("AllowOrigins");                
+            }            
+            else
             {
                 origins = allowOrigins.Split(',');
             }
+            if (origins == null || origins.Length == 0)
+            {
+                origins = new string[] { "*" };
+            }
+
 
             var allowMethods = AppSetting.GetSetting("AllowMethods");
-            var methods = new string[] { "*" };
-            if (allowMethods != null)
+            string[] methods;
+            if (string.IsNullOrEmpty(allowMethods))
             {
-                methods = allowMethods.Split(',');
+                methods = AppSetting.GetSetting<string[]>("AllowMethods");                
             }
+            else
+            {
+                methods = allowMethods.Split(',');  
+            }
+            if (methods == null || methods.Length == 0)
+            {
+                methods = new string[] { "*" };
+            }
+
             //添加跨域解决方案
             services.AddCors(options =>
             {

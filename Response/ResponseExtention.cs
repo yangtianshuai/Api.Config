@@ -45,6 +45,17 @@ namespace Api.Config
         /// </summary>
         /// <param name="_result"></param>
         /// <returns></returns>
+        public static RedirectResult ToRedirect(this ResponseResult _result, string url)
+        {
+            return new RedirectResult(url);
+        }
+
+
+        /// <summary>
+        /// 返回文件
+        /// </summary>
+        /// <param name="_result"></param>
+        /// <returns></returns>
         public static FileContentResult ToFile(this ResponseResult _result)
         {
             return ToFile(_result, null);

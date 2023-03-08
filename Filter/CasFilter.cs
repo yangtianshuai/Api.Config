@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using NLog;
 using SSO.Client;
@@ -29,7 +30,7 @@ namespace Api.Config
         /// </summary>
         /// <param name="access_token"></param>
         /// <returns></returns>
-        public virtual bool AccessValidate(string access_token) { return false; }
+        public virtual bool AccessValidate(HttpContext context, string access_token) { return false; }
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
@@ -54,11 +55,12 @@ namespace Api.Config
             if (request.Query.ContainsKey(HttpExtention.ACCESS_TOKEN_KEY))
             {
                 var access_token = request.Query[HttpExtention.ACCESS_TOKEN_KEY];
-                if (AccessValidate(access_token) || AccessTokens.Contains(access_token))
+                if ((access_token != context.HttpContext.Response.GetToken() && AccessValidate(context.HttpContext, access_token))
+                    || AccessTokens.Contains(access_token))
                 {
-                    context.HttpContext.Response.SetToken(access_token);
+                    context.HttpContext.SetToken(access_token);
                     return;
-                }            
+                }      
             }
             request.ClientIP = ClientIp;
             _casHandler.SetRequest(request);//设置请求

@@ -115,11 +115,12 @@ namespace Api.Config.Net
         private static string SetProxy(string url)
         {
             var uri = new Uri(url);
-            var config = Config.Proxys.FirstOrDefault(t => t.Value.Contains(uri.Host));
+
+            var configs = Config.Proxys.Where(t => t.Value.Contains(uri.Host));
             //全局注入[{ new_host: 数组}]
-            if (config.Key != null)
+            if (configs.Count() > 0)
             {
-                url = url.Replace(uri.Host, config.Key);
+                url = url.Replace(uri.Host, configs.ToList()[0].Key);
             }
             return url;
         }

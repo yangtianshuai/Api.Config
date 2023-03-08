@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Api.Config.Cache
 {
-    public class MemoryCacheUnit : CacheUnit
+    public class MemoryCacheUnit : ICacheUnit
     {
         private readonly IMemoryCache _cache;
 
@@ -15,7 +15,7 @@ namespace Api.Config.Cache
             _cache = cache;
         }
 
-        public override bool Clear(string key)
+        public bool Clear(string key)
         {
             try
             {
@@ -28,7 +28,7 @@ namespace Api.Config.Cache
             }
         }
 
-        public override async Task<bool> ClearAsync(string key)
+        public async Task<bool> ClearAsync(string key)
         {
             return await Task.Run(() =>
             {
@@ -36,7 +36,7 @@ namespace Api.Config.Cache
             }).ConfigureAwait(false);
         }
 
-        public override T Get<T>(string key)
+        public T Get<T>(string key)
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -45,7 +45,7 @@ namespace Api.Config.Cache
             return _cache.Get<T>(key);
         }
 
-        public override async Task<T> GetAsync<T>(string key)
+        public async Task<T> GetAsync<T>(string key)
         {
             return await Task.Run(() =>
             {
@@ -53,7 +53,7 @@ namespace Api.Config.Cache
             }).ConfigureAwait(false);
         }
 
-        public override bool Set(string key, object value, TimeSpan? timeSpan = null)
+        public bool Set(string key, object value, TimeSpan? timeSpan = null)
         {            
             if (timeSpan == null || timeSpan == TimeSpan.MinValue)
             {
@@ -74,7 +74,7 @@ namespace Api.Config.Cache
             return true;
         }
 
-        public override async Task<bool> SetAsync(string key, object value, TimeSpan? timeSpan = null)
+        public async Task<bool> SetAsync(string key, object value, TimeSpan? timeSpan = null)
         {
             return await Task.Run(() =>
             {

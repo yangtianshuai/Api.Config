@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using NLog;
+using System;
 using System.Diagnostics;
 using System.Linq;
 
@@ -23,7 +24,7 @@ namespace Api.Config
         public ActionFilter()
         {
             _logger = LogManager.GetCurrentClassLogger();
-        }
+        }      
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
@@ -32,7 +33,14 @@ namespace Api.Config
         }
 
         public void OnActionExecuted(ActionExecutedContext context)
-        {           
+        {
+            var domains = AppSetting.GetSetting<string[]>("FrameDomains");
+            if (domains != null && domains.Length > 0)
+            {
+                var domain_join = string.Join(" ", domains);
+                context.HttpContext.Response.AddHeader("X-Frame-Options", "ALLOW-FROM " + domain_join);
+                context.HttpContext.Response.AddHeader("Content-Security-Policy", "frame-ancestors " + domain_join);
+            }
             watch.Stop();
             try
             {
@@ -133,7 +141,7 @@ namespace Api.Config
 
             if (success)
             {
-                _logger.Warn(info);
+                _logger.Trace(info);
             }
             else
             {
