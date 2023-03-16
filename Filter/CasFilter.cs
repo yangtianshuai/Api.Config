@@ -130,15 +130,15 @@ namespace Api.Config
                     context.HttpContext.SetToken(cookie.ID);
                 }
             });
-            try
-            {
+            //try
+            //{
                 //Cas验证
                 _casHandler.Validate(true);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex.Message, ex.StackTrace);
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    _logger.Error(ex.Message, ex.StackTrace);
+            //}
         }
     }
 }
