@@ -52,12 +52,12 @@ namespace Api.Config
             }
             else
             {
-                if(!string.IsNullOrEmpty(context.HttpContext.Response.GetToken()))
+                if(context.HttpContext.Response.CheckCas())
                 {
                     return;
                 }
             }
-            var session = _session.Get<Session>(token);
+            var session = _session.GetAsync<Session>(token).GetAwaiter().GetResult();
             if (session == null)
             {                
                 context.HttpContext.NoAuthorization();

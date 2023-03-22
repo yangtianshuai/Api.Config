@@ -124,6 +124,18 @@ namespace Api.Config
             AddHeader(response, "Access-Control-Expose-Headers", token_key, true, ",");
         }
 
+        private static string cas_key = "cas_pass";
+        public static void SetCasPass(this HttpResponse response)
+        {
+            AddHeader(response, cas_key, "true");
+            AddHeader(response, "Access-Control-Expose-Headers", cas_key, true, ",");
+        }
+        public static bool CheckCas(this HttpResponse response)
+        {
+            var cas = response.Headers[cas_key];
+            return cas == "true";
+        }
+
         public static void AddHeader(this HttpResponse response, string header, string value, bool check = false, string split = null)
         {
             if (response.Headers.ContainsKey(header))
