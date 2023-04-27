@@ -38,11 +38,16 @@ namespace Api.Config.Cache
 
         public T Get<T>(string key)
         {
-            if (string.IsNullOrEmpty(key))
+            try
             {
-                return default(T);
+                if (string.IsNullOrEmpty(key))
+                {
+                    return default(T);
+                }
+                return _cache.Get<T>(key);
             }
-            return _cache.Get<T>(key);
+            catch { }
+            return default;
         }
 
         public async Task<T> GetAsync<T>(string key)

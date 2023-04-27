@@ -75,6 +75,10 @@ namespace Api.Config
 
             request.CallBack.Redirect += new Action<string>((url) =>
             {
+                if (context.HttpContext.Response.HasStarted)
+                {
+                    return;
+                }
                 if (_options.Mode == CasMode.Proxy)
                 {
                     //跳转                    
@@ -118,16 +122,17 @@ namespace Api.Config
             {
                 if (cookie != null && !string.IsNullOrEmpty(cookie.ID))
                 {
+                    context.HttpContext.Response.SetCasPass();
                     try
                     {
                         await ValidateComplate(cookie);
+                        //验证
+                        context.HttpContext.SetToken(cookie.ID);
                     }
                     catch (Exception ex)
                     {
                         _logger.Error(ex.Message, ex.StackTrace);
                     }
-                    //验证
-                    context.HttpContext.SetToken(cookie.ID);
                 }
             });
             try
