@@ -66,7 +66,6 @@ namespace Api.Config
             _casHandler.SetRequest(request);//设置请求
             request.RequestHost = context.HttpContext.GetBaseUrl();
 
-
             var mapping_url = _casHandler.GetOptions().GetBaseURL(request.RequestHost, true);
                         
             _logger.Debug($"origin={ context.HttpContext.Request.Headers["origin"]}");
@@ -105,6 +104,10 @@ namespace Api.Config
                     {
                         if (cookie != null)
                         {
+                            if (context.HttpContext.Response.HasStarted)
+                            {
+                                return;
+                            }
                             await LogoutComplate(cookie);
                         }
                     });
@@ -122,6 +125,10 @@ namespace Api.Config
             {
                 if (cookie != null && !string.IsNullOrEmpty(cookie.ID))
                 {
+                    if (context.HttpContext.Response.HasStarted)
+                    {
+                        return;
+                    }
                     context.HttpContext.Response.SetCasPass();
                     try
                     {

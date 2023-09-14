@@ -6,6 +6,19 @@ namespace Api.Config
     /// </summary>
     public class ResponseResult
     {
+      public ApiResponse() { }
+
+    public ApiResponse(int code, String message) {
+        this.code = code;
+        this.message = message;
+    }
+
+    public ApiResponse(int code, String message, T data) {
+        this.code = code;
+        this.message = message;
+        this.data = data;
+    }
+
         /// <summary>
         /// Code
         /// </summary>
