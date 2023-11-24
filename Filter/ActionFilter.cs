@@ -51,7 +51,7 @@ namespace Api.Config
                     if (context.Result != null)
                     {
                         var result = (context.Result as dynamic).Value;
-                        if (result != null)
+                        if (result != null && result?.Code != null)
                         {
                             success = result.Code == 1;
                             res = result.Data != null ? result.Data.ToString() : result.Message;

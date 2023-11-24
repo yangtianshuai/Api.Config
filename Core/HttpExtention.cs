@@ -71,6 +71,20 @@ namespace Api.Config
             return query;
         }
 
+        public static Dictionary<string, string> GetQuerys(this HttpContext context)
+        {
+            var querys = new Dictionary<string, string>();
+            foreach (var query in context.Request.Query)
+            {
+                //加载查询条件请求参数（URL中Param传参）
+                if (!querys.ContainsKey(query.Key))
+                {
+                    querys.Add(query.Key, query.Value);
+                }
+            }
+            return querys;
+        }
+
         /// <summary>
         /// 获取远端连接IP
         /// </summary>

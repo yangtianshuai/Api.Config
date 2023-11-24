@@ -12,7 +12,7 @@ namespace Api.Config
         private readonly ISessionService _sessionService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        internal static TimeSpan Span = TimeSpan.FromHours(8);
+        internal static TimeSpan Span = TimeSpan.FromHours(2);
         
         /// <summary>
         /// ServerSession

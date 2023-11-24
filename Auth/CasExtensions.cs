@@ -88,7 +88,7 @@ namespace Api.Config
                 Scheme = httpContext.Request.Scheme,
                 Host = httpContext.Request.Host.ToString(),
                 Path = httpContext.Request.Path
-            };
+            };            
             if (casMode == CasMode.Proxy)
             {
                 var url = httpContext.Request.Headers["url"].ToString();                

@@ -5,19 +5,7 @@ namespace Api.Config
     /// ResponseResult
     /// </summary>
     public class ResponseResult
-    {
-      public ApiResponse() { }
-
-    public ApiResponse(int code, String message) {
-        this.code = code;
-        this.message = message;
-    }
-
-    public ApiResponse(int code, String message, T data) {
-        this.code = code;
-        this.message = message;
-        this.data = data;
-    }
+    {       
 
         /// <summary>
         /// Code
@@ -39,7 +27,7 @@ namespace Api.Config
                 if (value != null && Code == 0)
                 {
                     Code = 1;
-                }                
+                }
             }
         }
         /// <summary>
@@ -75,6 +63,6 @@ namespace Api.Config
         public bool IsSuccess()
         {
             return Code == 1;
-        }          
+        }
     }
 }

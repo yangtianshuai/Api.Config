@@ -92,9 +92,12 @@ namespace Api.Config
                     context.HttpContext.Response.Redirect(url);
                 }
             });
-
+                        
             var token = context.HttpContext.GetToken();
-
+            if (string.IsNullOrEmpty(token) && _casHandler.IsLogout(context.HttpContext.Request.Path))
+            {
+                token = context.HttpContext.Request.Query[CasParameter.TICKET];
+            }
             if (_casHandler.Exist(token))
             {
                 //已经通过验证
@@ -115,7 +118,7 @@ namespace Api.Config
                     _casHandler.Logout(token);
                 }
                 else
-                {                    
+                {
                     context.HttpContext.Response.SetCasPass();
                 }
                 return;

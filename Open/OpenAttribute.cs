@@ -1,5 +1,4 @@
-﻿using Api.Config.Core;
-using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
 using System.Collections.Generic;
 
 namespace Api.Config.Filter

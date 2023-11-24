@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Api.Config.Cache
@@ -38,16 +36,18 @@ namespace Api.Config.Cache
 
         public T Get<T>(string key)
         {
+            if (string.IsNullOrEmpty(key))
+            {
+                return default(T);
+            }
             try
             {
-                if (string.IsNullOrEmpty(key))
-                {
-                    return default(T);
-                }
                 return _cache.Get<T>(key);
             }
-            catch { }
-            return default;
+            catch
+            {
+                return default(T);
+            }
         }
 
         public async Task<T> GetAsync<T>(string key)
