@@ -34,11 +34,15 @@ namespace Api.Config.Open
         /// <returns></returns>
         public async Task<string> GetAsync(string url, Dictionary<string, string> values = null, Action<HttpResponseHeaders> action2 = null)
         {
-            return await HttpHelper.GetAsync(url, values, (param, header) =>
+            var param = new HttpService().ToParam(url, values, (_param, _header) =>
             {
-                header.SetAccessToken(access_token);
-                header.SetOpenSign(param);
+                if(string.IsNullOrEmpty(access_token))
+                {
+                    _header.SetAccessToken(access_token);
+                }                
+                _header.SetOpenSign(_param);
             }, action2);
+            return await HttpHelper.GetStringAsync(param);
         }
         /// <summary>
         /// Post请求
@@ -48,10 +52,15 @@ namespace Api.Config.Open
         /// <returns></returns>
         public async Task<string> PostAsync(string url, HttpContent content, Action<HttpResponseHeaders> action2 = null)
         {
-            return await HttpHelper.PostAsync(url, content, (param, header) =>
+            var param = new HttpService().ToParam2(url, content, (_param, _header) =>
             {
-                header.SetOpenSign(param);
+                if (string.IsNullOrEmpty(access_token))
+                {
+                    _header.SetAccessToken(access_token);
+                }
+                _header.SetOpenSign(_param);
             }, action2);
+            return await HttpHelper.GetStringAsync(param);
         }
     }
 }

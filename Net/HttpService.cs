@@ -33,7 +33,7 @@ namespace Api.Config.Net
             };
         }
 
-        public HttpParam ToParam(string url, HttpContent content, Action<HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
+        public HttpParam ToParam2(string url, HttpContent content, Action<HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
         {
             return new HttpParam
             {
@@ -46,7 +46,7 @@ namespace Api.Config.Net
             };
         }
 
-        public HttpParam ToParam(string url, HttpContent content, Action<HttpParam, HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
+        public HttpParam ToParam2(string url, HttpContent content, Action<HttpParam, HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
         {
             return new HttpParam
             {

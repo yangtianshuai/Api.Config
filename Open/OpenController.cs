@@ -31,11 +31,12 @@ namespace Api.Config.Open
         public async Task<IActionResult> CallBackAsync(string url)
         {
             var result = new ResponseResult();
-            //运维平台开放接口信息            
-            var res = JsonConvert.DeserializeObject<ResponseResult>(await HttpHelper.GetAsync(url, (param, header) =>
-            {                
-                header.SetOpenSign(param);
-            }));
+            //运维平台开放接口信息   
+            var param = new HttpService().ToParam(url, null,(_param, _header) =>
+            {               
+                _header.SetOpenSign(_param);
+            });
+            var res = JsonConvert.DeserializeObject<ResponseResult>(await HttpHelper.GetStringAsync(param));
             if (res.IsSuccess())
             {
                 var json = JObject.FromObject(res.Data).ToObject<OpenApiJson>();

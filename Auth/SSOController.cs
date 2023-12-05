@@ -13,7 +13,7 @@ namespace Api.Config.Auth
         private readonly CasOptions _options;
         public SSOController(CasOptions options)
         {
-
+            _options = options;
         }
 
         [HttpGet("user/Logout")]

@@ -13,44 +13,7 @@ namespace Api.Config.Net
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        internal static HttpConfig Config { get; set; } = new HttpConfig();
-
-        /// <summary>
-        /// Get请求
-        /// </summary>
-        /// <param name="url">URL路径</param>
-        /// <param name="action">请求回调</param>
-        /// <param name="action2">返回回调</param>
-        /// <returns></returns>
-        public static async Task<string> GetAsync(string url, Action<HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
-        {         
-            return await GetAsync(url,null,action, action2);
-        }
-
-        /// <summary>
-        /// Get请求
-        /// </summary>
-        /// <param name="url">URL路径</param>
-        /// <param name="action">请求回调</param>
-        /// <param name="action2">返回回调</param>
-        /// <returns></returns>
-        public static async Task<string> GetAsync(string url, Action<HttpParam, HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
-        {
-            return await GetAsync(url, null, action, action2);
-        }
-
-        /// <summary>
-        /// Get请求
-        /// </summary>
-        /// <param name="url">URL路径</param>
-        /// <param name="values">参数集合</param>
-        /// <param name="action">请求回调</param>
-        /// <param name="action2">返回回调</param>
-        /// <returns></returns>
-        public static async Task<string> GetAsync(string url, Dictionary<string, string> values = null, Action<HttpParam, HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
-        {
-            return await GetStringAsync(new HttpService().ToParam(url, values, action, action2));
-        }
+        internal static HttpConfig Config { get; set; } = new HttpConfig();        
 
         /// <summary>
         /// Get请求
@@ -137,44 +100,7 @@ namespace Api.Config.Net
                 url = url.Replace(uri.Host, configs.ToList()[0].Key);
             }
             return url;
-        }
-
-        /// <summary>
-        /// Post请求
-        /// </summary>
-        /// <param name="url">请求地址</param>
-        /// <param name="action">请求回调</param>
-        /// <param name="action2">返回回调</param>
-        /// <returns></returns>
-        public static async Task<string> PostAsync(string url, Action<HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
-        {            
-            return await PostAsync(url, null, action, action2);
-        }
-
-        /// <summary>
-        /// Post请求
-        /// </summary>
-        /// <param name="url">请求地址</param>
-        /// <param name="action">请求回调</param>
-        /// <param name="action2">返回回调</param>
-        /// <returns></returns>
-        public static async Task<string> PostAsync(string url, Action<HttpParam, HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
-        {
-            return await PostAsync(url, null, action, action2);
-        }
-
-        /// <summary>
-        /// Post请求
-        /// </summary>
-        /// <param name="url">请求地址</param>
-        /// <param name="content">参数</param>
-        /// <param name="action">请求回调</param>
-        /// <param name="action2">返回回调</param>
-        /// <returns></returns>
-        public static async Task<string> PostAsync(string url, HttpContent content, Action<HttpParam, HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
-        {
-            return await PostStringAsync(new HttpService().ToParam(url, content, action, action2));
-        }
+        }                
 
         /// <summary>
         /// Post请求
@@ -186,7 +112,7 @@ namespace Api.Config.Net
         /// <returns></returns>
         public static async Task<string> PostAsync(string url, HttpContent content, Action<HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
         {
-            return await PostStringAsync(new HttpService().ToParam(url, content, action, action2));
+            return await PostStringAsync(new HttpService().ToParam2(url, content, action, action2));
         }
 
         /// <summary>
