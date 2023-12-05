@@ -11,36 +11,64 @@ namespace Api.Config.Net
 {
     public class HttpHelper
     {
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
         internal static HttpConfig Config { get; set; } = new HttpConfig();
 
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-        
         /// <summary>
         /// Get请求
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="url">URL路径</param>
-        /// <param name="values">参数</param>
-        /// <returns></returns>       
-        public static async Task<string> GetAsync(string url, Dictionary<string, string> values = null, Action<HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
-        {
-            var param = new HttpParam
-            {
-                url = url,
-                values = values,
-                request_action = action,
-                responese_action = action2,
-                sucess_ensure = Config.SuccessOnly,
-                timeout = Config.TimeOut
-            };
+        /// <param name="action">请求回调</param>
+        /// <param name="action2">返回回调</param>
+        /// <returns></returns>
+        public static async Task<string> GetAsync(string url, Action<HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
+        {         
+            return await GetAsync(url,null,action, action2);
+        }
 
-            return await GetStringAsync(param);
+        /// <summary>
+        /// Get请求
+        /// </summary>
+        /// <param name="url">URL路径</param>
+        /// <param name="action">请求回调</param>
+        /// <param name="action2">返回回调</param>
+        /// <returns></returns>
+        public static async Task<string> GetAsync(string url, Action<HttpParam, HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
+        {
+            return await GetAsync(url, null, action, action2);
+        }
+
+        /// <summary>
+        /// Get请求
+        /// </summary>
+        /// <param name="url">URL路径</param>
+        /// <param name="values">参数集合</param>
+        /// <param name="action">请求回调</param>
+        /// <param name="action2">返回回调</param>
+        /// <returns></returns>
+        public static async Task<string> GetAsync(string url, Dictionary<string, string> values = null, Action<HttpParam, HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
+        {
+            return await GetStringAsync(new HttpService().ToParam(url, values, action, action2));
+        }
+
+        /// <summary>
+        /// Get请求
+        /// </summary>
+        /// <param name="url">URL路径</param>
+        /// <param name="values">参数集合</param>
+        /// <param name="action">请求回调</param>
+        /// <param name="action2">返回回调</param>
+        /// <returns></returns>
+        public static async Task<string> GetAsync(string url, Dictionary<string, string> values = null, Action<HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
+        {         
+            return await GetStringAsync(new HttpService().ToParam(url, values, action, action2));
         }
 
         /// <summary>
         /// Get请求,返回字符串
         /// </summary>
-        /// <param name="param"></param>
+        /// <param name="param">请求参数</param>
         /// <returns></returns>
         public static async Task<string> GetStringAsync(HttpParam param)
         {
@@ -52,39 +80,25 @@ namespace Api.Config.Net
         /// <summary>
         /// Get请求
         /// </summary> 
-        /// <param name="param">参数</param>
+        /// <param name="param">请求参数</param>
         /// <returns></returns>       
         public static async Task<HttpContent> GetAsync(HttpParam param)
         {
-            if (param.values != null)
-            {
-                string query = "";
-                foreach (var value in param.values)
-                {
-                    if (query.Length > 0)
-                    {
-                        query += "&";
-                    }
-                    query += $"{ value.Key}={ value.Value}";
-                }
-                if (query.Length > 0)
-                {
-                    param.url = param.url + "?" + query;
-                }
-            }           
+            param.url = param.GetUri();
 
             using (var client = new HttpClient(GetHandler(param.url)))
             {
                 try
-                {
+                {                    
                     client.Timeout = TimeSpan.FromSeconds(param.timeout);
-                    param.request_action?.Invoke(client.DefaultRequestHeaders);
-
-                    Stopwatch watch = new Stopwatch();
-                    watch.Start();
 
                     //设置代理
                     param.url = SetProxy(param.url);
+                    param.request_action?.Invoke(client.DefaultRequestHeaders);
+                    param.http_request_action?.Invoke(param, client.DefaultRequestHeaders);
+
+                    Stopwatch watch = new Stopwatch();
+                    watch.Start();                    
 
                     var response = await client.GetAsync(param.url);
                     watch.Stop();
@@ -128,22 +142,51 @@ namespace Api.Config.Net
         /// <summary>
         /// Post请求
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="url">URL路径</param>
-        /// <param name="content">Http内容</param>
+        /// <param name="url">请求地址</param>
+        /// <param name="action">请求回调</param>
+        /// <param name="action2">返回回调</param>
+        /// <returns></returns>
+        public static async Task<string> PostAsync(string url, Action<HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
+        {            
+            return await PostAsync(url, null, action, action2);
+        }
+
+        /// <summary>
+        /// Post请求
+        /// </summary>
+        /// <param name="url">请求地址</param>
+        /// <param name="action">请求回调</param>
+        /// <param name="action2">返回回调</param>
+        /// <returns></returns>
+        public static async Task<string> PostAsync(string url, Action<HttpParam, HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
+        {
+            return await PostAsync(url, null, action, action2);
+        }
+
+        /// <summary>
+        /// Post请求
+        /// </summary>
+        /// <param name="url">请求地址</param>
+        /// <param name="content">参数</param>
+        /// <param name="action">请求回调</param>
+        /// <param name="action2">返回回调</param>
+        /// <returns></returns>
+        public static async Task<string> PostAsync(string url, HttpContent content, Action<HttpParam, HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
+        {
+            return await PostStringAsync(new HttpService().ToParam(url, content, action, action2));
+        }
+
+        /// <summary>
+        /// Post请求
+        /// </summary>
+        /// <param name="url">请求地址</param>
+        /// <param name="content">参数</param>
+        /// <param name="action">请求回调</param>
+        /// <param name="action2">返回回调</param>
         /// <returns></returns>
         public static async Task<string> PostAsync(string url, HttpContent content, Action<HttpRequestHeaders> action = null, Action<HttpResponseHeaders> action2 = null)
         {
-            var param = new HttpParam
-            {
-                url = url,
-                request_content = content,
-                request_action = action,
-                responese_action = action2,
-                sucess_ensure = Config.SuccessOnly,
-                timeout = Config.TimeOut
-            };
-            return await PostStringAsync(param);
+            return await PostStringAsync(new HttpService().ToParam(url, content, action, action2));
         }
 
         /// <summary>
@@ -170,13 +213,15 @@ namespace Api.Config.Net
                 using (var client = new HttpClient(GetHandler(param.url)))
                 {
                     client.Timeout = TimeSpan.FromSeconds(param.timeout);
-                    param.request_action?.Invoke(client.DefaultRequestHeaders);
-
-                    Stopwatch watch = new Stopwatch();
-                    watch.Start();
 
                     //设置代理
                     param.url = SetProxy(param.url);
+
+                    param.request_action?.Invoke(client.DefaultRequestHeaders);
+                    param.http_request_action?.Invoke(param,client.DefaultRequestHeaders);
+
+                    Stopwatch watch = new Stopwatch();
+                    watch.Start();
 
                     var response = await client.PostAsync(param.url, param.request_content);
                     watch.Stop();
@@ -226,9 +271,31 @@ namespace Api.Config.Net
         public string url { get; set; }
         public Dictionary<string, string> values { get; set; }
         public HttpContent request_content { get; set; }
+        public Action<HttpParam, HttpRequestHeaders> http_request_action { get; set; }
         public Action<HttpRequestHeaders> request_action { get; set; }
         public Action<HttpResponseHeaders> responese_action { get; set; }
         public bool sucess_ensure { get; set; }
         public int timeout { get; set; }
+
+        public string GetUri()
+        {
+            if (this.values != null)
+            {
+                string query = "";
+                foreach (var value in this.values)
+                {
+                    if (query.Length > 0)
+                    {
+                        query += "&";
+                    }
+                    query += $"{ value.Key}={ value.Value}";
+                }
+                if (query.Length > 0)
+                {
+                    return this.url + "?" + query;
+                }
+            }
+            return this.url;
+        }
     }
 }

@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Storage.Client;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using Api.Config.Net;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 
 namespace Api.Config.Open
@@ -29,6 +26,25 @@ namespace Api.Config.Open
             result.Data = _openOptions.GetApps();
             return result.ToJson();
         }
+                
+        [HttpGet("call_back")]
+        public async Task<IActionResult> CallBackAsync(string url)
+        {
+            var result = new ResponseResult();
+            //运维平台开放接口信息            
+            var res = JsonConvert.DeserializeObject<ResponseResult>(await HttpHelper.GetAsync(url, (param, header) =>
+            {                
+                header.SetOpenSign(param);
+            }));
+            if (res.IsSuccess())
+            {
+                var json = JObject.FromObject(res.Data).ToObject<OpenApiJson>();
+                _openOptions.SetOpen(json);
+            }
+            
+            return result.ToJson();
+        }
+
 
         [HttpGet("refresh")]
         public async Task<IActionResult> RefreshAppsAsync()

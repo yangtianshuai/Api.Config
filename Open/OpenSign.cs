@@ -16,5 +16,16 @@
         /// 签名
         /// </summary>
         public string Signature { get; set; }
+
+        internal static string BodyKey()
+        {
+            return "body";
+        }
+
+        internal static int MaxBodyLen()
+        {
+            return 32;
+        }
+
     }
 }

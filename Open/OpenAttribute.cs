@@ -9,15 +9,21 @@ namespace Api.Config.Filter
     public class OpenAttribute : ActionFilterAttribute
     {
         private List<string> _apps;
-
-        public OpenAttribute()
-        {
-            
-        }
+        private bool access_token_flag = true;
+        
         public OpenAttribute(params string[] app_ids)
         {
             _apps = new List<string>();
             _apps.AddRange(app_ids);
+        }
+        public OpenAttribute(bool access_token_flag, params string[] app_ids) : this(app_ids)
+        {
+            this.access_token_flag = access_token_flag;
+        }
+
+        public bool AccessToken()
+        {
+            return this.access_token_flag;
         }
 
         public List<string> GetApps(string path = null)
@@ -29,8 +35,7 @@ namespace Api.Config.Filter
             if(!string.IsNullOrEmpty(path) && OpenOptions.OpenApps.ContainsKey(path))
             {
                 return OpenOptions.OpenApps[path];
-            }
-            //第一次从服务器加载
+            }            
             return null;
         }
     }

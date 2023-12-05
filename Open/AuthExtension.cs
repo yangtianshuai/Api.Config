@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Api.Config.Net;
+using Api.Config.Open;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -6,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Api.Config
 {
@@ -45,36 +48,54 @@ namespace Api.Config
 
         private static string BuildSign(HttpRequest request)
         {
-            var dict = new SortedDictionary<string, string>();
+            var dict = GetDictionary(request);
+            return BuildSign(dict);
+        }
 
-            var querys = request.Query;
-            if (querys.Count > 0)
+        public static SortedDictionary<string, string> GetDictionary(HttpRequest request)
+        {
+            var dict = new SortedDictionary<string, string>();
+            if (request.ContentLength.Value > 0)
             {
-                foreach (var query in querys)
+                try
+                {
+                    int count = OpenSign.MaxBodyLen();
+                    if (request.ContentLength.Value < count)
+                    {
+                        count = (int)request.ContentLength.Value;
+                    }
+
+                    byte[] buffer = new byte[request.ContentLength.Value];
+                    Stream stream = null;
+                    request.Body.CopyTo(stream);
+                    stream.Read(buffer, 0, count);
+                    // 转化为字符串                        
+                    var body = Encoding.UTF8.GetString(buffer);
+                    dict.Add(OpenSign.BodyKey(), body);
+                }
+                catch { }
+            }
+            else if (request.Form.Count > 0)
+            {
+                foreach (var query in request.Form)
                 {
                     dict.Add(query.Key, query.Value);
                 }
             }
-            else
+            else if (request.Query.Count > 0)
             {
-                if (request.ContentLength != null)
+                foreach (var query in request.Query)
                 {
-                    try
-                    {                        
-                        byte[] buffer = new byte[request.ContentLength.Value];
-                        Stream stream = null;
-                        request.Body.CopyTo(stream);
-                        stream.Read(buffer, 0, buffer.Length);
-                        // 转化为字符串                        
-                        var body = Encoding.UTF8.GetString(buffer);
-                        dict.Add("body", body);
-                    }
-                    catch { }
+                    dict.Add(query.Key, query.Value);
                 }
-            }         
+            }
 
-            return string.Join("&",dict.OrderBy(t => t.Key).Select(a => $"{a.Key}={ a.Value}"));
+            return dict;
+        }        
 
+        private static string BuildSign(SortedDictionary<string, string> dict)
+        {           
+            return string.Join("&", dict.OrderBy(t => t.Key).Select(a => $"{a.Key}={ a.Value}"));
         }
 
         /// <summary>
@@ -85,18 +106,35 @@ namespace Api.Config
         /// <returns></returns>
         public static OpenSign GetOpenSign(this HttpContext context,string app_id = null)
         {
+            var dict = GetDictionary(context.Request);            
+            return GetOpenSign(dict,app_id);
+        }
+
+        private static OpenSign GetOpenSign(SortedDictionary<string, string> dict, string app_id = null)
+        {
             var sign = new OpenSign();
-            if(string.IsNullOrEmpty(app_id))
+            if (string.IsNullOrEmpty(app_id))
             {
                 app_id = OpenOptions.AppID;
             }
-            sign.AppId = app_id;            
-            sign.Signature = BuildSign(context.Request);
-            sign.Timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-            sign.Nonce = new Random().Next(1000,9999).ToString();
-            sign.Signature = MD5(sign.Signature + sign.Nonce);
+            sign.AppId = app_id;           
+            return sign.Get(dict);
+        }
+
+        internal static OpenSign Get(this OpenSign sign, Dictionary<string, string> dict, string app_id = null)
+        {
+            sign = GetOpenSign(new SortedDictionary<string, string>(dict), app_id);
             return sign;
         }
+
+        private static OpenSign Get(this OpenSign sign, SortedDictionary<string, string> dict)
+        {
+            sign.Signature = BuildSign(dict);
+            sign.Timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+            sign.Nonce = new Random().Next(1000, 9999).ToString();
+            sign.Signature = MD5(sign.Signature + sign.Nonce);
+            return sign;
+        }        
 
         /// <summary>
         /// 设置OpenSign
@@ -128,10 +166,27 @@ namespace Api.Config
             headers.TryAddWithoutValidation(key, GetOpenSignValue(sign));
         }
 
+        internal static void SetOpenSign(this HttpRequestHeaders headers, HttpParam param, string app_id = null)
+        {
+            var sign = param.GetOpenSign(app_id);
+            headers.TryAddWithoutValidation(key, GetOpenSignValue(sign));
+        }
+
         internal static void SetOpenSign(this HttpContentHeaders headers, OpenSign sign)
         {
             headers.TryAddWithoutValidation(key, GetOpenSignValue(sign));
         }
+
+        internal static bool AccessCheck(this HttpContext context, string path)
+        {
+            var access_token = context.Request.GetAccessToken();
+            if (!OpenOptions.AccessToken(path, access_token))
+            {
+                return false;
+            }
+            return true;
+        }
+
 
         internal static bool OpenCheck(this HttpContext context, List<string> apps)
         {
@@ -139,6 +194,7 @@ namespace Api.Config
             {
                 return false;
             }
+            
             var open_sign = GetOpenSign(context.Request); 
             if(open_sign == null)
             {
@@ -160,7 +216,7 @@ namespace Api.Config
                 if (seconds > OpenOptions.OutTime)
                 {
                     //验证不超过5分钟
-                    //return false;
+                    return false;
                 }
             }         
 

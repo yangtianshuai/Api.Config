@@ -2,7 +2,7 @@
 using SSO.Client;
 using System.Threading.Tasks;
 
-namespace Api.Config.File
+namespace Api.Config.Auth
 {
     /// <summary>
     /// SSO

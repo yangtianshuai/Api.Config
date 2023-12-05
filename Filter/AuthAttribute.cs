@@ -76,9 +76,13 @@ namespace Api.Config
                 var open = Attrs.FirstOrDefault(t => t.GetType().Equals(typeof(OpenAttribute)));
                 if (open != null)
                 {                    
+                    var _open = open as OpenAttribute;
                     var route = context.HttpContext.GetRoute();
-                    var _apps = ((OpenAttribute)open).GetApps(route);
-                    if (context.HttpContext.OpenCheck(_apps))
+                    var _apps = _open.GetApps(route);
+
+                    var access_token_flag = !_open.AccessToken() || context.HttpContext.AccessCheck(route);
+                    
+                    if (access_token_flag && context.HttpContext.OpenCheck(_apps))
                     {
                         NoAuthAttr = true;
                         WhiteListContain = true;

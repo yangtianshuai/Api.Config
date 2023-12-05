@@ -37,7 +37,16 @@ namespace Api.Config
         /// <returns></returns>
         public async Task<T> GetSessionAsync<T>()
         {
-            var key = _httpContextAccessor.HttpContext.GetToken();
+            var key = _httpContextAccessor.HttpContext.GetToken();            
+            return await GetSessionAsync<T>(key);
+        }
+
+        /// <summary>
+        /// 获取session
+        /// </summary>
+        /// <returns></returns>
+        public async Task<T> GetSessionAsync<T>(string key)
+        {           
             if (key == null)
             {
                 return default(T);
@@ -52,6 +61,15 @@ namespace Api.Config
         public T GetSession<T>()
         {
             var key = _httpContextAccessor.HttpContext.GetToken();
+            return GetSession<T>(key);
+        }
+
+        /// <summary>
+        /// 获取session
+        /// </summary>
+        /// <returns></returns>
+        public T GetSession<T>(string key)
+        {           
             if (key == null)
             {
                 return default(T);
@@ -94,6 +112,39 @@ namespace Api.Config
                 _httpContextAccessor.HttpContext.SetToken(session.Token);
             }
             return true;
+        }
+
+        public bool ClearSession(string token)
+        {
+            try
+            {
+                _httpContextAccessor.HttpContext.ClearToken();
+                return _sessionService.Remove(new Session
+                {
+                    Token = token
+                });
+            }
+            catch
+            {
+                return false;
+            }            
+            
+        }
+
+        public async Task<bool> ClearSessionAsync(string token)
+        {
+            try
+            {
+                _httpContextAccessor.HttpContext.ClearToken();
+                return await _sessionService.RemoveAsync(new Session
+                {
+                    Token = token
+                });
+            }
+            catch
+            {
+                return false;
+            }            
         }
     }
 }

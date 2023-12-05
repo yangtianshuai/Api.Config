@@ -14,15 +14,12 @@ namespace Api.Config
         /// 添加Cas服务
         /// </summary>
         /// <param name="services"></param>
-        /// <param name="option">Cas参数</param>
+        /// <param name="option">CAS参数</param>
         /// <returns></returns>
         public static IServiceCollection AddCas(this IServiceCollection services, Action<CasOptions> option)
         {
             var options = new CasOptions();
-            if (option != null)
-            {                
-                option(options);                
-            }
+            option?.Invoke(options);
             services.AddSingleton(typeof(CasOptions), options);
             //设置注入项目
             if (options.LogoutPath == null)
@@ -103,7 +100,7 @@ namespace Api.Config
                     request.Host = uri.Host;
                     request.Port = uri.Port;
                     request.Path = uri.PathAndQuery;
-                    request.Query = httpContext.GetQueryString(uri.Query);
+                    request.Query = uri.Query.GetQuery();
                 }                
             }
             else

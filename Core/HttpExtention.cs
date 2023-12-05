@@ -1,6 +1,7 @@
 ﻿using Api.Config.Setting;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 
 namespace Api.Config
 {
@@ -42,12 +43,17 @@ namespace Api.Config
             return null;
         }
 
+        public static void SetAccessToken(this HttpRequestHeaders headers, string access_token)
+        {
+            headers.TryAddWithoutValidation(ACCESS_TOKEN_KEY, access_token);
+        }
+
         public static string GetVirtualPath(this HttpContext context)
         {           
             return AppSetting.GetSetting("Virtual"); ;
         }
 
-        public static Dictionary<string, string> GetQueryString(this HttpContext context,string url)
+        public static Dictionary<string, string> GetQuery(this string url)
         {
             var query = new Dictionary<string, string>();
             if (!url.Contains("?"))
