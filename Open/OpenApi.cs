@@ -16,12 +16,12 @@ namespace Api.Config.Open
 
         private string access_token;
 
-        public static OpenApi GetApi(string id)
+        public static OpenApi Get(string id)
         {
             var api = new OpenApi();
             
             var item = OpenOptions.GetAccess(id);
-            api.access_token = item.acess_token;
+            api.access_token = item?.acess_token;
             return new OpenApi();
         }
 

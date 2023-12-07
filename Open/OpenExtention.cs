@@ -1,11 +1,9 @@
 ﻿using Api.Config.Net;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Api.Config
@@ -23,13 +21,28 @@ namespace Api.Config
             var options = new OpenOptions();
             if (action != null)
             {
-                options.Action = action;
+                options.DownLoad = action;
                 action(options);
             }
             if(!string.IsNullOrEmpty(OpenOptions.AppID))
             {
                 services.AddSingleton(options);
-            }            
+            }
+            //开启线程
+            if (options.DownLoad != null)
+            {
+                //首次加载
+                options.DownLoad(options);
+                Task.Run(() =>
+                {
+                    if (!string.IsNullOrEmpty(OpenOptions.AppID))
+                    {
+                        Thread.Sleep(OpenOptions.OutTime * 1000);
+                        //拉取
+                        options.DownLoad(options);
+                    }
+                });
+            }
             //加载权限
             return services;
         }      

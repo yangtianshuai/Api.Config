@@ -1,13 +1,10 @@
 ﻿using Api.Config.Filter;
 using Api.Config.Proxy;
 using Api.Config.Setting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Api.Config
 {

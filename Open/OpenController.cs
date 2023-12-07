@@ -9,7 +9,7 @@ namespace Api.Config.Open
     /// <summary>
     /// 开放接口
     /// </summary>
-    [Route("open")]
+    [Route("/open")]
     public class OpenController : ApiCorsController
     {
         private readonly OpenOptions _openOptions;
@@ -26,8 +26,9 @@ namespace Api.Config.Open
             result.Data = _openOptions.GetApps();
             return result.ToJson();
         }
-                
+
         [HttpGet("call_back")]
+        [NoAuthorization,NoCas]
         public async Task<IActionResult> CallBackAsync(string url)
         {
             var result = new ResponseResult();
@@ -46,13 +47,15 @@ namespace Api.Config.Open
             return result.ToJson();
         }
 
-
+        /// <summary>
+        /// 刷新数据
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("refresh")]
-        public async Task<IActionResult> RefreshAppsAsync()
+        public async Task<IActionResult> RefreshAsync()
         {
             var result = new ResponseResult();
-            _openOptions.Clear();
-            _openOptions.Action(_openOptions);
+            _openOptions.DownLoad(_openOptions);
             result.Sucess("刷新成功");
             return result.ToJson();
         }

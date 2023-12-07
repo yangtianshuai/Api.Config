@@ -11,7 +11,7 @@ namespace Api.Config.File
     /// <summary>
     /// 存储
     /// </summary>
-    [Route("storage")]
+    [Route("/storage")]
     public class StorageController : ApiCorsController
     {
         private readonly StorageOptions _storageOptions;

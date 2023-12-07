@@ -124,15 +124,15 @@ namespace Api.Config
             AddHeader(response, "Access-Control-Expose-Headers", token_key, true, ",");
         }
 
-        private static string cas_key = "cas_pass";
-        public static void SetCasPass(this HttpResponse response)
+        private static string sso_pass_key = "sso_pass";
+        public static void SetSsoPass(this HttpResponse response)
         {
-            AddHeader(response, cas_key, "true");
-            AddHeader(response, "Access-Control-Expose-Headers", cas_key, true, ",");
+            AddHeader(response, sso_pass_key, "true");
+            AddHeader(response, "Access-Control-Expose-Headers", sso_pass_key, true, ",");
         }
-        public static bool CheckCas(this HttpResponse response)
+        public static bool CheckSso(this HttpResponse response)
         {
-            var cas = response.Headers[cas_key];
+            var cas = response.Headers[sso_pass_key];
             return cas == "true";
         }
 

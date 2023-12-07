@@ -1,15 +1,7 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using Storage.Client;
 using System;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Api.Config
 {
@@ -20,10 +12,7 @@ namespace Api.Config
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             var options = new StorageOptions();
-            if (option != null)
-            {
-                option(options);
-            }
+            option?.Invoke(options);
             //设置Service
             var service = options.GetService();
             service.Client = new ClientInfo

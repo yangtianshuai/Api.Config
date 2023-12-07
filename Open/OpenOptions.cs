@@ -7,7 +7,7 @@ namespace Api.Config
 {
     public class OpenOptions
     {
-        internal static string AppID { get; private set; }
+        public static string AppID { get; private set; }
         /// <summary>
         /// 超时时间（秒）
         /// </summary>
@@ -23,7 +23,7 @@ namespace Api.Config
             OutTime = sencond;
         }
 
-        internal Action<OpenOptions> Action { get; set; }
+        public Action<OpenOptions> DownLoad { get; set; }
         internal static ConcurrentDictionary<string, List<string>> OpenApps { get; set; } = new ConcurrentDictionary<string, List<string>>();
         private static ConcurrentDictionary<string, string> OpenTokens { get; set; } = new ConcurrentDictionary<string, string>();
         private static ConcurrentDictionary<string, OpenApiItem> Access { get; set; } = new ConcurrentDictionary<string, OpenApiItem>();

@@ -8,23 +8,33 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Api.Config
+namespace Api.Config.Sso
 {
-    public class CasFilter : AuthAttribute
+    public class SsoFilter : AuthAttribute
     {
-        private readonly ICasHandler _casHandler;
-        private readonly CasOptions _options;
+        private readonly ISsoHandler _casHandler;
+        private readonly SsoOptions _options;
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
        
-        public CasFilter(ICasHandler casHandler)
+        public SsoFilter(ISsoHandler casHandler)
         {
             _casHandler = casHandler;
             _options = casHandler.GetOptions();
         }
 
-        public virtual Task ValidateComplate(CasCookie cookie) { return Task.CompletedTask; }
+        /// <summary>
+        /// 通过验证
+        /// </summary>
+        /// <param name="cookie"></param>
+        /// <returns></returns>
+        public virtual Task ValidateComplate(SsoCookie cookie) { return Task.CompletedTask; }
 
-        public virtual Task LogoutComplate(CasCookie cookie) { return Task.CompletedTask; }
+        /// <summary>
+        /// 退出登录
+        /// </summary>
+        /// <param name="cookie"></param>
+        /// <returns></returns>
+        public virtual Task LogoutComplate(SsoCookie cookie) { return Task.CompletedTask; }
         /// <summary>
         /// 访问控制验证
         /// </summary>
@@ -41,7 +51,7 @@ namespace Api.Config
                 return;
             }
 
-            if (context.HttpContext.PassCas())
+            if (context.HttpContext.PassSso())
             {
                 return;
             }
@@ -51,7 +61,7 @@ namespace Api.Config
                 return;
             }
 
-            var request = context.HttpContext.GetCasRequest(_options.Mode);
+            var request = context.HttpContext.GetRequest(_options.Mode);
             if (request.Query.ContainsKey(HttpExtention.ACCESS_TOKEN_KEY))
             {
                 var access_token = request.Query[HttpExtention.ACCESS_TOKEN_KEY];
@@ -78,7 +88,7 @@ namespace Api.Config
                 {
                     return;
                 }
-                if (_options.Mode == CasMode.Proxy)
+                if (_options.Mode == SsoMode.Proxy)
                 {
                     //跳转                    
                     context.HttpContext.Response.AddHeader("redirect-url", url);
@@ -96,14 +106,14 @@ namespace Api.Config
             var token = context.HttpContext.GetToken();
             if (string.IsNullOrEmpty(token) && _casHandler.IsLogout(context.HttpContext.Request.Path))
             {
-                token = context.HttpContext.Request.Query[CasParameter.TICKET];
+                token = context.HttpContext.Request.Query[SsoParameter.TICKET];
             }
             if (_casHandler.Exist(token))
             {
                 //已经通过验证
                 if (_casHandler.IsLogout(context.HttpContext.Request.Path))
                 {
-                    request.CallBack.Logout += new Action<CasCookie>(async (cookie) =>
+                    request.CallBack.Logout += new Action<SsoCookie>(async (cookie) =>
                     {
                         if (cookie != null)
                         {
@@ -119,12 +129,12 @@ namespace Api.Config
                 }
                 else
                 {
-                    context.HttpContext.Response.SetCasPass();
+                    context.HttpContext.Response.SetSsoPass();
                 }
                 return;
             }
 
-            request.CallBack.Validate += new Action<CasCookie>(async (cookie) =>
+            request.CallBack.Validate += new Action<SsoCookie>(async (cookie) =>
             {
                 if (cookie != null && !string.IsNullOrEmpty(cookie.ID))
                 {
@@ -132,7 +142,7 @@ namespace Api.Config
                     {
                         return;
                     }
-                    context.HttpContext.Response.SetCasPass();
+                    context.HttpContext.Response.SetSsoPass();
                     try
                     {
                         await ValidateComplate(cookie);

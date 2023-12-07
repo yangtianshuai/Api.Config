@@ -40,9 +40,9 @@ namespace Api.Config
             var token = context.HttpContext.GetToken();
             if (token == null)
             {
-                if (context.HttpContext.PassCas())
+                if (context.HttpContext.PassSso())
                 {
-                    context.HttpContext.ClearCas();
+                    context.HttpContext.ClearSsoCookie();
                     return;
                 }
                 context.HttpContext.NoAuthorization();
@@ -52,7 +52,7 @@ namespace Api.Config
             }
             else
             {
-                if(context.HttpContext.Response.CheckCas())
+                if(context.HttpContext.Response.CheckSso())
                 {
                     return;
                 }

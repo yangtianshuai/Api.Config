@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Api.Config.Sso;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using SSO.Client;
+using SSO.Client.CAS;
+using SSO.Client.OAuth2;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +11,7 @@ using System.Web;
 
 namespace Api.Config
 {
-    public static class CasExtensions
+    public static class SsoExtensions
     {
         /// <summary>
         /// 添加Cas服务
@@ -16,25 +19,45 @@ namespace Api.Config
         /// <param name="services"></param>
         /// <param name="option">CAS参数</param>
         /// <returns></returns>
-        public static IServiceCollection AddCas(this IServiceCollection services, Action<CasOptions> option)
+        public static IServiceCollection AddSSO(this IServiceCollection services, Action<SsoOptions> option)
         {
-            var options = new CasOptions();
+            var options = new SsoOptions();
             option?.Invoke(options);
-            services.AddSingleton(typeof(CasOptions), options);
+            services.AddSingleton(typeof(SsoOptions), options);
             //设置注入项目
-            if (options.LogoutPath == null)
-            {               
-                options.LogoutPath = "/sso/user/Logout";
+            if (string.IsNullOrEmpty(options.LogoutPath))
+            {
+                options.LogoutPath = "/sso/user/logout";
                 MvcRouter.Add(options.LogoutPath, context =>
-                {                    
+                {
                     context.ClearToken();
                 });
             }           
-            services.AddScoped<ICasHandler, CasHandler>();
             return services;
         }
 
-        public static List<IPMapping> AddIpMappings(this CasOptions option, IPMapping[] mappings)
+        public static IServiceCollection UseCas(this IServiceCollection services)
+        {            
+            services.AddScoped<ISsoHandler, CasHandler>();
+            return services;
+        }
+
+        public static IServiceCollection UseOAuth2(this IServiceCollection services, Action<OAuth2Options> option)
+        {
+            var options = new OAuth2Options();
+            option?.Invoke(options);
+            //发起请求时回调URL地址，用于获取到Code码
+            services.AddSingleton(typeof(OAuth2Options), options);
+
+            if (string.IsNullOrEmpty(options.RedictUri))
+            {
+                options.RedictUri = "/sso/user/call_back";                
+            }            
+            services.AddScoped<ISsoHandler, OAuth2Handler>();
+            return services;
+        }
+
+        public static List<IPMapping> AddIpMappings(this SsoOptions option, IPMapping[] mappings)
         {
             if (option.IPMappings == null)
             {
@@ -43,19 +66,19 @@ namespace Api.Config
             if (mappings == null)
             {
                 return option.IPMappings;
-            }            
-            foreach(var mapping in mappings)
+            }
+            foreach (var mapping in mappings)
             {
                 var _mapping = option.IPMappings.Find(t => t.server_ip == mapping.server_ip && t.base_url == mapping.base_url);
                 if (_mapping == null)
                 {
                     option.IPMappings.Add(mapping);
                 }
-            }       
+            }
             return option.IPMappings;
         }
 
-        public static List<IPMapping> AddIpMapping(this CasOptions option, IPMapping mapping)
+        public static List<IPMapping> AddIpMapping(this SsoOptions option, IPMapping mapping)
         {
             if (option.IPMappings == null)
             {
@@ -74,21 +97,21 @@ namespace Api.Config
         }
 
         /// <summary>
-        /// 获取Cas请求
+        /// 获取请求
         /// </summary>
         /// <param name="httpContext"></param>
         /// <returns></returns>
-        public static CasRequest GetCasRequest(this HttpContext httpContext, CasMode casMode)
+        public static SsoRequest GetRequest(this HttpContext httpContext, SsoMode casMode)
         {
-            var request = new CasRequest
+            var request = new SsoRequest
             {
                 Scheme = httpContext.Request.Scheme,
                 Host = httpContext.Request.Host.ToString(),
                 Path = httpContext.Request.Path
-            };            
-            if (casMode == CasMode.Proxy)
+            };
+            if (casMode == SsoMode.Proxy)
             {
-                var url = httpContext.Request.Headers["url"].ToString();                
+                var url = httpContext.Request.Headers["url"].ToString();
                 if (string.IsNullOrEmpty(url))
                 {
                     url = httpContext.Request.Headers["referer"].ToString();
@@ -101,7 +124,7 @@ namespace Api.Config
                     request.Port = uri.Port;
                     request.Path = uri.PathAndQuery;
                     request.Query = uri.Query.GetQuery();
-                }                
+                }
             }
             else
             {
@@ -138,35 +161,35 @@ namespace Api.Config
             return request;
         }
 
-        private static string no_cas = "no-cas";
+        private static string no_sso = "no-sso";
 
         /// <summary>
-        /// 通过Cas验证
+        /// 通过SSO验证
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        public static bool PassCas(this HttpContext context)
+        public static bool PassSso(this HttpContext context)
         {
             var cas = "";
-            if (context.Request.Cookies.ContainsKey(no_cas))
+            if (context.Request.Cookies.ContainsKey(no_sso))
             {
-                cas = context.Request.Cookies[no_cas];
+                cas = context.Request.Cookies[no_sso];
             }
-            else if (context.Response.Headers.ContainsKey(no_cas))
+            else if (context.Response.Headers.ContainsKey(no_sso))
             {
-                cas = context.Request.Cookies[no_cas];
+                cas = context.Request.Cookies[no_sso];
             }
 
             return cas == "true";
         }
 
         /// <summary>
-        /// 无需Cas验证
+        /// 无需SSO验证
         /// </summary>       
         /// <returns></returns>
         public static void NoCas(this HttpContext context)
         {
-            if(PassCas(context))
+            if (PassSso(context))
             {
                 return;
             }
@@ -178,26 +201,26 @@ namespace Api.Config
                 HttpOnly = true
             };
             if (context.Request.Scheme.ToLower() == "https")
-            {                
+            {
                 option.Secure = true;
             }
             else
-            {                
+            {
                 if (context.Request.GetBrowserVersion("Chrome") > 79)
                 {
-                    context.Response.SetCookie2(no_cas, "true", option);
+                    context.Response.SetCookie2(no_sso, "true", option);
                 }
             }
-            context.Response.Cookies.Append(no_cas, "true", option);
+            context.Response.Cookies.Append(no_sso, "true", option);
         }
-        
+
         /// <summary>
-        /// 清除Cas验证
+        /// 清除验证
         /// </summary>       
         /// <returns></returns>
-        public static void ClearCas(this HttpContext context)
+        public static void ClearSsoCookie(this HttpContext context)
         {
-            context.Response.Cookies.Delete(no_cas);
+            context.Response.Cookies.Delete(no_sso);
         }
     }
 }
