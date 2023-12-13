@@ -29,18 +29,31 @@ namespace Api.Config
                 services.AddSingleton(options);
             }
             //开启线程
-            if (options.DownLoad != null)
+            if (options.DownLoad != null && !string.IsNullOrEmpty(OpenOptions.AppID))
             {
                 //首次加载
                 options.DownLoad(options);
                 Task.Run(() =>
                 {
-                    if (!string.IsNullOrEmpty(OpenOptions.AppID))
+                    int counter = 1;
+                    while (OpenOptions.OutTime > 0)
                     {
-                        Thread.Sleep(OpenOptions.OutTime * 1000);
-                        //拉取
-                        options.DownLoad(options);
-                    }
+                        if (counter > 10)
+                        {
+                            counter = 1;
+                        }
+                        Thread.Sleep(OpenOptions.OutTime * counter * 1000);
+                        try
+                        {
+                            //拉取
+                            options.DownLoad(options);
+                            counter = 1;
+                        }
+                        catch
+                        {
+                            counter++;
+                        }
+                    }                 
                 });
             }
             //加载权限

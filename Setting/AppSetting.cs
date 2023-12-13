@@ -31,7 +31,7 @@ namespace Api.Config.Setting
         public static T GetSetting<T>(string key)
         {
             if (Configuration != null)
-            {
+            {                
                 return Configuration.GetSection(key).Get<T>();
             }
             else if (Option != null)

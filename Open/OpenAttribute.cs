@@ -27,16 +27,17 @@ namespace Api.Config.Filter
         }
 
         public List<string> GetApps(string path = null)
-        {            
+        {
+            var apps = new List<string>();
             if (_apps != null && _apps.Count > 0)
             {
-                return _apps;
+                apps = _apps;
             }
             if(!string.IsNullOrEmpty(path) && OpenOptions.OpenApps.ContainsKey(path))
             {
-                return OpenOptions.OpenApps[path];
+                apps.AddRange(OpenOptions.OpenApps[path]);
             }            
-            return null;
+            return apps;
         }
     }
 }

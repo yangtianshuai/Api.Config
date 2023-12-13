@@ -55,7 +55,7 @@ namespace Api.Config
         public static SortedDictionary<string, string> GetDictionary(HttpRequest request)
         {
             var dict = new SortedDictionary<string, string>();
-            if (request.ContentLength.Value > 0)
+            if (request.ContentLength != null && request.ContentLength.Value > 0)
             {
                 try
                 {
@@ -75,7 +75,7 @@ namespace Api.Config
                 }
                 catch { }
             }
-            else if (request.Form.Count > 0)
+            else if (request.HasFormContentType && request.Form.Count > 0)
             {
                 foreach (var query in request.Form)
                 {

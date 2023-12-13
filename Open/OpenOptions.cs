@@ -7,6 +7,11 @@ namespace Api.Config
 {
     public class OpenOptions
     {
+        ~ OpenOptions()
+        {
+            OutTime = 0;
+        }
+
         public static string AppID { get; private set; }
         /// <summary>
         /// 超时时间（秒）

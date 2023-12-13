@@ -124,8 +124,9 @@ namespace Api.Config.Sso
                             await LogoutComplate(cookie);
                         }
                     });
-                    context.HttpContext.ClearToken();
-                    _casHandler.Logout(token);
+                    bool redirect_flag = true;
+                    redirect_flag = context.HttpContext.Request.Query[SsoParameter.Redirect] != "no";
+                    _casHandler.Logout(token, redirect_flag);
                 }
                 else
                 {
@@ -146,8 +147,6 @@ namespace Api.Config.Sso
                     try
                     {
                         await ValidateComplate(cookie);
-                        //验证
-                        context.HttpContext.SetToken(cookie.ID);
                     }
                     catch (Exception ex)
                     {

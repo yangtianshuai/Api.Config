@@ -44,6 +44,8 @@ namespace Api.Config
         /// <summary>
         /// 获取session
         /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">关键Key</param>
         /// <returns></returns>
         public async Task<T> GetSessionAsync<T>(string key)
         {           
@@ -52,6 +54,26 @@ namespace Api.Config
                 return default(T);
             }
             return await _sessionService.GetAsync<T>(key);
+        }
+
+        /// <summary>
+        /// 是否存在
+        /// </summary>
+        /// <param name="key">关键Key</param>
+        /// <returns></returns>
+        public bool Contain(string key)
+        {           
+            return _sessionService.Contain(key);
+        }
+
+        /// <summary>
+        /// 是否存在
+        /// </summary>
+        /// <param name="key">关键Key</param>
+        /// <returns></returns>
+        public async Task<bool> ContainAsync(string key)
+        {
+            return await _sessionService.ContainAsync(key);
         }
 
         /// <summary>

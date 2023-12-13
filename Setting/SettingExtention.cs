@@ -52,12 +52,26 @@ namespace Api.Config
                     AppSetting.Context.Load(config);
                     Task.Run(() =>
                     {
+                        int counter = 1;
                         while (AppSetting.Option.PullTicks > 0)
                         {
+                            if (counter > 10)
+                            {
+                                counter = 1;
+                            }
                             Thread.Sleep(AppSetting.Option.PullTicks * 1000);
-                            //拉取
-                            config = AppSetting.Option.DowLoad(AppSetting.Context);
-                            AppSetting.Context.Load(config);
+                            try
+                            {
+                                //拉取
+                                //拉取
+                                config = AppSetting.Option.DowLoad(AppSetting.Context);
+                                AppSetting.Context.Load(config);
+                                counter = 1;
+                            }
+                            catch
+                            {
+                                counter++;
+                            }                            
                         }
                     });
                 }

@@ -16,13 +16,13 @@ namespace Api.Config.Sso
             _options = options;
         }
 
-        [HttpGet("user/logout")]
+        [HttpGet("user/logout"),NoAuthorization]
         public async Task<IActionResult> Logout(string ticket)
         {
-            return Ok();
+            return Ok("success");
         }
 
-        [HttpGet("user/call_back")]
+        [HttpGet("user/call_back"), NoAuthorization]
         public async Task<IActionResult> CallBack(string state)
         {
             return Ok();

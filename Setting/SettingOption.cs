@@ -4,6 +4,10 @@ namespace Api.Config.Setting
 {
     public class SettingOption
     {
+        ~SettingOption()
+        {
+            PullTicks = 0;
+        }
         /// <summary>
         /// 拉取频次（秒）
         /// </summary>
