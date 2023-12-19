@@ -1,5 +1,4 @@
 ﻿using Api.Config.Net;
-using Api.Config.Open;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
@@ -8,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Api.Config
 {

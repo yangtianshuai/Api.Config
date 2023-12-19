@@ -32,6 +32,7 @@ namespace Api.Config.Open
         public async Task<IActionResult> CallBackAsync(string url)
         {
             var result = new ResponseResult();
+            
             //运维平台开放接口信息   
             var param = new HttpService().ToParam(url, null,(_param, _header) =>
             {               

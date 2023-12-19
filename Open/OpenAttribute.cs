@@ -21,22 +21,18 @@ namespace Api.Config.Filter
             this.access_token_flag = access_token_flag;
         }
 
-        public bool AccessToken()
+        internal bool AccessToken()
         {
             return this.access_token_flag;
         }
 
-        public List<string> GetApps(string path = null)
+        internal List<string> GetApps()
         {
             var apps = new List<string>();
             if (_apps != null && _apps.Count > 0)
             {
                 apps = _apps;
-            }
-            if(!string.IsNullOrEmpty(path) && OpenOptions.OpenApps.ContainsKey(path))
-            {
-                apps.AddRange(OpenOptions.OpenApps[path]);
-            }            
+            }                        
             return apps;
         }
     }

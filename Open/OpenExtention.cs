@@ -30,9 +30,7 @@ namespace Api.Config
             }
             //开启线程
             if (options.DownLoad != null && !string.IsNullOrEmpty(OpenOptions.AppID))
-            {
-                //首次加载
-                options.DownLoad(options);
+            {                
                 Task.Run(() =>
                 {
                     int counter = 1;
@@ -41,8 +39,7 @@ namespace Api.Config
                         if (counter > 10)
                         {
                             counter = 1;
-                        }
-                        Thread.Sleep(OpenOptions.OutTime * counter * 1000);
+                        }                        
                         try
                         {
                             //拉取
@@ -53,6 +50,7 @@ namespace Api.Config
                         {
                             counter++;
                         }
+                        Thread.Sleep(OpenOptions.OutTime * counter * 1000);
                     }                 
                 });
             }

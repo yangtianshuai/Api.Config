@@ -4,6 +4,7 @@ namespace Api.Config.Open
 {
     public class OpenApiItem
     {
+        public string app_id { get; set; }
         /// <summary>
         /// 服务ID，必须唯一
         /// </summary>
@@ -19,7 +20,7 @@ namespace Api.Config.Open
         /// <summary>
         /// 路由
         /// </summary>
-        public string path { get; set; }
+        public string path { get; set; }        
         /// <summary>
         /// 授权应用
         /// </summary>

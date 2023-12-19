@@ -32,7 +32,8 @@ namespace Api.Config
         internal static ConcurrentDictionary<string, List<string>> OpenApps { get; set; } = new ConcurrentDictionary<string, List<string>>();
         private static ConcurrentDictionary<string, string> OpenTokens { get; set; } = new ConcurrentDictionary<string, string>();
         private static ConcurrentDictionary<string, OpenApiItem> Access { get; set; } = new ConcurrentDictionary<string, OpenApiItem>();
-
+        private static ConcurrentDictionary<string, ServerConfig> AccessServers { get; set; } = new ConcurrentDictionary<string, ServerConfig>();
+        
         /// <summary>
         /// 添加服务访问权限
         /// </summary>
@@ -46,11 +47,22 @@ namespace Api.Config
             {
                 route = '/' + route;
             }
-            if (string.IsNullOrEmpty(access_token))
+            if (!string.IsNullOrEmpty(access_token))
             {
                 OpenTokens.TryAdd(route, access_token);
             }
             return OpenApps.TryAdd(route, apps);
+        }
+
+        /// <summary>
+        /// 添加服务访问权限
+        /// </summary>
+        /// <param name="route"></param>
+        /// <param name="apps"></param>
+        /// <returns></returns>
+        public bool Add(string route, List<string> apps)
+        {
+            return Add(route, null, apps);
         }
 
         public void Clear()

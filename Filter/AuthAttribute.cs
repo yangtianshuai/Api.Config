@@ -70,22 +70,28 @@ namespace Api.Config
             }
             else
             {
+                var apps = new List<string>();
+                bool access_token_flag = true;
                 var open = Attrs.FirstOrDefault(t => t.GetType().Equals(typeof(OpenAttribute)));
                 if (open != null)
-                {                    
+                {
                     var _open = open as OpenAttribute;
-                    var route = context.HttpContext.GetRoute();
-                    var _apps = _open.GetApps(route);
-
-                    var access_token_flag = !_open.AccessToken() || context.HttpContext.AccessCheck(route);
-                    
-                    if (access_token_flag && context.HttpContext.OpenCheck(_apps))
-                    {
-                        NoAuthAttr = true;
-                        WhiteListContain = true;
-                    }
+                    apps = _open.GetApps();
+                    access_token_flag = !_open.AccessToken();
                 }
-            }            
+                var route = context.HttpContext.GetRoute();
+                if (!string.IsNullOrEmpty(route) && OpenOptions.OpenApps.ContainsKey(route))
+                {
+                    apps.AddRange(OpenOptions.OpenApps[route]);
+                    access_token_flag = access_token_flag || context.HttpContext.AccessCheck(route);
+                }
+
+                if (access_token_flag && context.HttpContext.OpenCheck(apps))
+                {
+                    NoAuthAttr = true;
+                    WhiteListContain = true;
+                }
+            }          
         }        
     }
 }
