@@ -114,11 +114,26 @@ namespace Api.Config
         public async Task<bool> SetSessionAsync(Session session)
         {
             await _sessionService.SetAsync(session);
+            SetToken(session);
+            return true;
+        }
+
+        public void SetToken(Session session)
+        {            
             if (session != null)
             {
                 _httpContextAccessor.HttpContext.SetToken(session.Token);
             }
-            return true;
+        }
+
+        public bool ContainToken(Session session)
+        {
+            return _httpContextAccessor.HttpContext.GetToken() == session.Token;
+        }
+
+        public string GetToken()
+        {
+            return _httpContextAccessor.HttpContext.GetToken();
         }
 
         /// <summary>

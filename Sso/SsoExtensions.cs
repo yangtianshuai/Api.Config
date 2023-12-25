@@ -1,5 +1,4 @@
-﻿using Api.Config.Sso;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using SSO.Client;
 using SSO.Client.CAS;
@@ -123,7 +122,19 @@ namespace Api.Config
                     request.Host = uri.Host;
                     request.Port = uri.Port;
                     request.Path = uri.PathAndQuery;
-                    request.Query = uri.Query.GetQuery();
+                    foreach(var pair in uri.Query.GetQuery())
+                    {
+                        if (request.Query.ContainsKey(pair.Key))
+                        {
+                            request.Query[pair.Key].Add(pair.Value);
+                        }
+                        else
+                        {
+                            var value = new List<string>();
+                            value.Add(pair.Value);
+                            request.Query.Add(pair.Key, value);
+                        }                        
+                    }
                 }
             }
             else
@@ -132,9 +143,15 @@ namespace Api.Config
                 foreach (var query in querys)
                 {
                     //加载查询条件请求参数（URL中Param传参）
-                    if (!request.Query.ContainsKey(query.Key))
+                    if (request.Query.ContainsKey(query.Key))
                     {
-                        request.Query.Add(query.Key, query.Value);
+                        request.Query[query.Key].Add(query.Value);
+                    }
+                    else
+                    {
+                        var value = new List<string>();
+                        value.Add(query.Value);
+                        request.Query.Add(query.Key, value);
                     }
                 }
                 var cookies = httpContext.Request.Cookies;

@@ -28,7 +28,7 @@ namespace Api.Config.Open
         }
 
         [HttpGet("call_back")]
-        [NoAuthorization,NoCas]
+        [NoAuthorization,NoSso]
         public async Task<IActionResult> CallBackAsync(string url)
         {
             var result = new ResponseResult();
