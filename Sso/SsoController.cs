@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SSO.Client;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Api.Config.Sso
@@ -25,6 +26,12 @@ namespace Api.Config.Sso
         [HttpGet("user/call_back"), NoAuthorization]
         public async Task<IActionResult> CallBack(string state)
         {
+            if(HttpContext.Response.StatusCode == (int)HttpStatusCode.Redirect)
+            {
+                var url = HttpContext.Response.Headers["redirect-url"].ToString();
+                return new RedirectResult(url, true);
+            }
+            
             return Ok();
         }
     }

@@ -44,7 +44,8 @@ namespace Api.Config
         public static IServiceCollection UseOAuth2(this IServiceCollection services, Action<OAuth2Options> option)
         {
             var options = new OAuth2Options();
-            option?.Invoke(options);
+            option?.Invoke(options);            
+
             //发起请求时回调URL地址，用于获取到Code码
             services.AddSingleton(typeof(OAuth2Options), options);
 
@@ -54,6 +55,11 @@ namespace Api.Config
             }            
             services.AddScoped<ISsoHandler, OAuth2Handler>();
             return services;
+        }
+
+        public static IServiceCollection UseOAuth2(this IServiceCollection services)
+        {
+            return UseOAuth2(services, options => { });
         }
 
         public static List<IPMapping> AddIpMappings(this SsoOptions option, IPMapping[] mappings)
@@ -108,6 +114,27 @@ namespace Api.Config
                 Host = httpContext.Request.Host.ToString(),
                 Path = httpContext.Request.Path
             };
+
+            request.OriginScheme = httpContext.Request.Scheme;
+            request.OriginHost = httpContext.GetBaseUrl();
+            request.OriginPath = httpContext.Request.Path;
+
+            var querys = httpContext.Request.Query;
+            foreach (var query in querys)
+            {
+                //加载查询条件请求参数（URL中Param传参）
+                if (request.Query.ContainsKey(query.Key))
+                {
+                    request.Query[query.Key].Add(query.Value);
+                }
+                else
+                {
+                    var value = new List<string>();
+                    value.Add(query.Value);
+                    request.OriginQuery.Add(query.Key, value);
+                }
+            }
+
             if (casMode == SsoMode.Proxy)
             {
                 var url = httpContext.Request.Headers["url"].ToString();
@@ -139,21 +166,7 @@ namespace Api.Config
             }
             else
             {
-                var querys = httpContext.Request.Query;
-                foreach (var query in querys)
-                {
-                    //加载查询条件请求参数（URL中Param传参）
-                    if (request.Query.ContainsKey(query.Key))
-                    {
-                        request.Query[query.Key].Add(query.Value);
-                    }
-                    else
-                    {
-                        var value = new List<string>();
-                        value.Add(query.Value);
-                        request.Query.Add(query.Key, value);
-                    }
-                }
+                request.Query = request.OriginQuery;
                 var cookies = httpContext.Request.Cookies;
                 foreach (var cookie in cookies)
                 {

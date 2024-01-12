@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Api.Config.Sso
 {
-    public class SsoFilter : AuthAttribute
+    public abstract class SsoFilter : AuthAttribute
     {
         private readonly ISsoHandler _ssoHandler;
         private readonly SsoOptions _options;
@@ -23,22 +23,26 @@ namespace Api.Config.Sso
             _ssoHandler = ssoHandler;
             _options = ssoHandler.GetOptions();
         }
-
-        public virtual string GetCookieID() { return ""; }
+        /// <summary>
+        /// 获取CookieID
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public abstract string GetCookieID(HttpContext context);
 
         /// <summary>
         /// 通过验证
         /// </summary>
         /// <param name="cookie"></param>
         /// <returns></returns>
-        public virtual Task ValidateComplate(SsoCookie cookie) { return Task.CompletedTask; }
+        public abstract Task ValidateComplate(SsoCookie cookie);
 
         /// <summary>
         /// 退出登录
         /// </summary>
         /// <param name="cookie"></param>
         /// <returns></returns>
-        public virtual Task LogoutComplate(SsoCookie cookie) { return Task.CompletedTask; }
+        public abstract Task LogoutComplate(SsoCookie cookie);
         /// <summary>
         /// 访问控制验证
         /// </summary>
@@ -77,20 +81,23 @@ namespace Api.Config.Sso
                 }      
             }
             request.ClientIP = ClientIp;
-            _ssoHandler.SetRequest(request);//设置请求
-            request.RequestHost = context.HttpContext.GetBaseUrl();
+            request.Ticket = GetCookieID(context.HttpContext);
+            if (string.IsNullOrEmpty(request.Ticket) && _ssoHandler.IsLogout(request.OriginPath))
+            {
+                request.Ticket = context.HttpContext.Request.Query[SsoParameter.TICKET];
+            }
+            _ssoHandler.SetRequest(request);//设置请求           
 
-            var mapping_url = _ssoHandler.GetOptions().GetBaseURL(request.RequestHost, true);
+            var mapping_url = _ssoHandler.GetOptions().GetBaseURL(request.OriginHost, true);
                         
             _logger.Debug($"origin={ context.HttpContext.Request.Headers["origin"]}");
             _logger.Debug($"referer={ context.HttpContext.Request.Headers["referer"]}");
-            _logger.Debug($"RequestHost={request.RequestHost},映射地址：" + mapping_url);
+            _logger.Debug($"RequestHost={request.OriginHost},映射地址：" + mapping_url);
 
-            request.CallBack.Redirect += new Action<string, bool>((url, repeat_check) =>
+            request.CallBack.Redirect += new Action<string, bool, SsoMode>((url, repeat_check, mode) =>
             {
                 if (repeat_check)
-                {
-                    var temp = request.GetURL();
+                {                    
                     var key = Convert.ToBase64String(Encoding.UTF8.GetBytes(request.ClientIP + request.GetURL()));
                     var create_time = CacheUnit.Current.GetAsync<DateTime?>(key).GetAwaiter().GetResult();
                     if (create_time != null)
@@ -106,7 +113,7 @@ namespace Api.Config.Sso
                 if (context.HttpContext.Response.HasStarted)
                 {
                     return;
-                }          
+                }
 
                 if (request.GetURL() == url && context.HttpContext.Response.CheckSso())
                 {
@@ -120,46 +127,41 @@ namespace Api.Config.Sso
                     return;
                 }
 
-                if (_options.Mode == SsoMode.Proxy)
+                context.HttpContext.Response.AddHeader("redirect-url", url);
+                if (mode == SsoMode.Proxy)
                 {
-                    //跳转                    
-                    context.HttpContext.Response.AddHeader("redirect-url", url);
+                    //跳转  
                     context.HttpContext.Response.AddHeader("Access-Control-Expose-Headers", "redirect-url", true, ",");
                     context.HttpContext.Response.StatusCode = (int)HttpStatusCode.Redirect;
                     context.Result = new JsonResult(context.HttpContext.Response.StatusCode);
                     return;
                 }
                 else
-                {
-                    //携带请求Body
-                    context.HttpContext.Response.Redirect(url);
+                {                    
+                    context.HttpContext.Response.StatusCode = (int)HttpStatusCode.Redirect;   
                 }
             });
-                        
-            var token = GetCookieID();
-            if (string.IsNullOrEmpty(token) && _ssoHandler.IsLogout(context.HttpContext.Request.Path))
+
+            request.CallBack.Logout += new Action<SsoCookie>((cookie) =>
             {
-                token = context.HttpContext.Request.Query[SsoParameter.TICKET];
-            }
-            if (_ssoHandler.Exist(token))
+                if (context.HttpContext.Response.HasStarted)
+                {
+                    return;
+                }
+                if (cookie != null)
+                {                    
+                    LogoutComplate(cookie).GetAwaiter().GetResult();
+                }
+            });
+
+            if (_ssoHandler.Exist(request.Ticket))
             {
                 //已经通过验证
-                if (_ssoHandler.IsLogout(context.HttpContext.Request.Path))
-                {
-                    request.CallBack.Logout += new Action<SsoCookie>((cookie) =>
-                    {
-                        if (cookie != null)
-                        {
-                            if (context.HttpContext.Response.HasStarted)
-                            {
-                                return;
-                            }
-                            LogoutComplate(cookie).GetAwaiter().GetResult();
-                        }
-                    });
+                if (_ssoHandler.IsLogout(request.OriginPath))
+                {                    
                     bool redirect_flag = true;
                     redirect_flag = context.HttpContext.Request.Query[SsoParameter.Redirect] != "no";
-                    _ssoHandler.Logout(token, redirect_flag);
+                    _ssoHandler.Logout(request.Ticket, redirect_flag);
                 }
                 else
                 {
@@ -170,12 +172,12 @@ namespace Api.Config.Sso
 
             request.CallBack.Validate += new Action<SsoCookie>((cookie) =>
             {
-                if (cookie != null && !string.IsNullOrEmpty(cookie.ID))
+                if (context.HttpContext.Response.HasStarted)
                 {
-                    if (context.HttpContext.Response.HasStarted)
-                    {
-                        return;
-                    }
+                    return;
+                }
+                if (cookie != null && !string.IsNullOrEmpty(cookie.ID))
+                {                    
                     context.HttpContext.Response.SetSsoPass();                    
                     try
                     {
