@@ -161,10 +161,10 @@ namespace Api.Config.Sso
                 if (_ssoHandler.IsLogout(request.OriginPath))
                 {                    
                     bool redirect_flag = true;
-                    redirect_flag = context.HttpContext.Request.Query[SsoParameter.Redirect] != "no";
+                    redirect_flag = context.HttpContext.Request.Query[SsoParameter.Redirect].ToString() != "no";
                     _logger.Debug($"【退出登录】开始执行，票据：{ request.Ticket }，redirect_flag={ redirect_flag }");
                     _ssoHandler.Logout(request.Ticket, redirect_flag);
-                    _logger.Debug($"【退出登录】开始完成，票据：{ request.Ticket }");
+                    _logger.Debug($"【退出登录】执行完成，票据：{ request.Ticket }");
                 }
                 else
                 {
