@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Api.Config.Cache;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using SSO.Client;
 using SSO.Client.CAS;
@@ -31,6 +32,10 @@ namespace Api.Config
                 {
                     context.ClearToken();
                 });
+            }
+            if(services.BuildServiceProvider().GetService<ICacheUnit>() == null)
+            {
+                services.AddCache();
             }           
             return services;
         }

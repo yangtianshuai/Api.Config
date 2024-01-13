@@ -26,7 +26,6 @@ namespace Api.Config.Cache
         {            
             services.AddSingleton<ICacheUnit, RedisCacheUnit>();
             SetCache(services);
-
             return services;
         }
 

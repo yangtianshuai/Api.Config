@@ -149,7 +149,8 @@ namespace Api.Config.Sso
                     return;
                 }
                 if (cookie != null)
-                {                    
+                {
+                    _logger.Debug($"【退出登录】清理本地Session，id={ cookie.ID }");
                     LogoutComplate(cookie).GetAwaiter().GetResult();
                 }
             });
@@ -161,7 +162,9 @@ namespace Api.Config.Sso
                 {                    
                     bool redirect_flag = true;
                     redirect_flag = context.HttpContext.Request.Query[SsoParameter.Redirect] != "no";
+                    _logger.Debug($"【退出登录】开始执行，票据：{ request.Ticket }，redirect_flag={ redirect_flag }");
                     _ssoHandler.Logout(request.Ticket, redirect_flag);
+                    _logger.Debug($"【退出登录】开始完成，票据：{ request.Ticket }");
                 }
                 else
                 {
