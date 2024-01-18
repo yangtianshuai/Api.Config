@@ -49,10 +49,11 @@ namespace Api.Config.Net
         {
             param.url = param.GetUri();
 
-            using (var client = new HttpClient(GetHandler(param.url)))
+
+            try
             {
-                try
-                {                    
+                using (var client = new HttpClient(GetHandler(param.url)))
+                {
                     client.Timeout = TimeSpan.FromSeconds(param.timeout);
 
                     //设置代理
@@ -61,7 +62,7 @@ namespace Api.Config.Net
                     param.http_request_action?.Invoke(param, client.DefaultRequestHeaders);
 
                     Stopwatch watch = new Stopwatch();
-                    watch.Start();                    
+                    watch.Start();
 
                     var response = await client.GetAsync(param.url);
                     watch.Stop();
@@ -81,10 +82,10 @@ namespace Api.Config.Net
                         return response.Content;
                     }
                 }
-                catch (Exception ex)
-                {
-                    _logger.Error($"HTTP发起GET请求发生错误：{ex.Message}，URL：{param.url}");
-                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"HTTP发起GET请求发生错误：{ex.Message}，URL：{param.url}");
             }
             return null;
         }

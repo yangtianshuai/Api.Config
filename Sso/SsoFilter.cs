@@ -43,6 +43,7 @@ namespace Api.Config.Sso
         /// <param name="cookie"></param>
         /// <returns></returns>
         public abstract Task LogoutComplate(SsoCookie cookie);
+        
         /// <summary>
         /// 访问控制验证
         /// </summary>
@@ -106,7 +107,7 @@ namespace Api.Config.Sso
                     }
                     else
                     {
-                        CacheUnit.Current.SetAsync(key, DateTime.Now, TimeSpan.FromSeconds(10)).GetAwaiter().GetResult();
+                        CacheUnit.Current.SetAsync(key, DateTime.Now, TimeSpan.FromSeconds(5)).GetAwaiter().GetResult();
                     }
                 }
 
