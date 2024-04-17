@@ -93,7 +93,7 @@ namespace Api.Config
                     {
                         options.AddPolicy(item.PolicyName, builder =>
                         {
-                            if(item.Origins == null || item.Origins.Count == 0)
+                            if(item.Origins == null || item.Origins.Count == 0 || item.Origins.Contains("*"))
                             {
                                 builder.AllowAnyOrigin();
                             }
@@ -102,7 +102,7 @@ namespace Api.Config
                                 builder.WithOrigins(item.Origins.ToArray());
                             }
 
-                            if (item.Methods == null || item.Methods.Count == 0)
+                            if (item.Methods == null || item.Methods.Count == 0 || item.Methods.Contains("*"))
                             {
                                 builder.AllowAnyMethod();
                             }
@@ -110,7 +110,7 @@ namespace Api.Config
                             {
                                 builder.WithOrigins(item.Methods.ToArray());
                             }
-                            if (item.Headers == null || item.Headers.Count == 0)
+                            if (item.Headers == null || item.Headers.Count == 0 || item.Headers.Contains("*"))
                             {
                                 builder.AllowAnyHeader();
                             }

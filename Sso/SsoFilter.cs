@@ -107,7 +107,7 @@ namespace Api.Config.Sso
                     }
                     else
                     {
-                        CacheUnit.Current.SetAsync(key, DateTime.Now, TimeSpan.FromSeconds(5)).GetAwaiter().GetResult();
+                        CacheUnit.Current.SetAsync(key, DateTime.Now, TimeSpan.FromSeconds(1)).GetAwaiter().GetResult();
                     }
                 }
 
@@ -122,9 +122,8 @@ namespace Api.Config.Sso
                 }
 
                 if (string.IsNullOrEmpty(url))
-                {
-                    context.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                    context.Result = new NoContentResult();
+                {                    
+                    context.Result = new ForbidResult();
                     return;
                 }
 
