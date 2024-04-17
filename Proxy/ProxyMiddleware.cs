@@ -1,18 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-using Storage.Client;
-using System;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Api.Config.Proxy
 {
-	public class ProxyMiddleware
+    public class ProxyMiddleware
 	{
 		private readonly RequestDelegate _next;
 		private readonly ProxyOptions _proxyOptions;

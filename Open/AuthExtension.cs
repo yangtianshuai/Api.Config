@@ -13,6 +13,7 @@ namespace Api.Config
     public static partial class HttpExtention
     {
         private static string key = "Open-Sign";
+
         /// <summary>
         /// 快速MD5
         /// </summary>

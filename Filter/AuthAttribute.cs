@@ -3,13 +3,16 @@ using Api.Config.Proxy;
 using Api.Config.Setting;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
+using NLog;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Api.Config
 {
     public abstract class AuthAttribute : IActionFilter
-    {       
+    {
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
         /// <summary>
         /// 白名单包含？
         /// </summary>
@@ -85,7 +88,7 @@ namespace Api.Config
                     apps.AddRange(OpenOptions.OpenApps[route]);
                     access_token_flag = access_token_flag || context.HttpContext.AccessCheck(route);
                 }
-
+                _logger.Debug($"Open接口：access_token_flag={access_token_flag}；apps=【{string.Join("、",apps)}】");
                 if (access_token_flag && context.HttpContext.OpenCheck(apps))
                 {
                     NoAuthAttr = true;

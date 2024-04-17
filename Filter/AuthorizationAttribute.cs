@@ -37,6 +37,7 @@ namespace Api.Config
                 }
             }
 
+            //通过Session方式验证、JWT方式
             var token = context.HttpContext.GetToken();
             if (token == null)
             {
@@ -46,6 +47,7 @@ namespace Api.Config
                     return;
                 }
                 context.HttpContext.NoAuthorization();
+                
                 context.Result = new JsonResult("No Authorization");
                 _logger.Debug("No Authorization，请求未发现token，IP：" + ClientIp);
                 return;
@@ -57,6 +59,7 @@ namespace Api.Config
                     return;
                 }
             }
+
             var session = _session.GetAsync<Session>(token).GetAwaiter().GetResult();
             if (session == null)
             {                
@@ -72,6 +75,8 @@ namespace Api.Config
                 session.Create_Time = DateTime.Now;
                 _session.Update(session);
             }
+
+            //角色权限控制
             var roles = Attrs.Where(t => t.GetType().Equals(typeof(RolesAttribute)));
             var list = new List<string>();
             foreach (var role in roles)
@@ -85,6 +90,9 @@ namespace Api.Config
                     }
                 }
             }
+
+            //通过路由找到角色代码 加到list
+
             if (list.Count > 0 && session.Roles != null)
             {
                 if (list.Where(t => session.Roles.Contains(t)).Count() == 0)

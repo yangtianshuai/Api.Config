@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 using Storage.Client;
 using System;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,7 +33,7 @@ namespace Api.Config
                 url = file_url,
                 file_type = storage.GetMode()
             };            
-            submit.md5 = GetMD5(stream); //文件指纹 
+            submit.md5 = CreateMD5(stream); //文件指纹 
             stream.Position = 0;
             var upload_view = await storage.Service.UploadAsync(submit);
             if (upload_view != null && upload_view.configs != null)
@@ -60,18 +57,18 @@ namespace Api.Config
             return upload_view;
         }
 
-        public static string GetMD5(FileStream stream)
-        {            
-            MD5 md5 = new MD5CryptoServiceProvider();
-            byte[] retVal = md5.ComputeHash(stream);           
-            md5.Clear();
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < retVal.Length; i++)
+        public static string CreateMD5(Stream input)
+        {
+            MD5CryptoServiceProvider md5Hasher = new MD5CryptoServiceProvider();
+            byte[] data = md5Hasher.ComputeHash(input);
+            input.Seek(0, SeekOrigin.Begin);
+            StringBuilder sBuilder = new StringBuilder();
+            for (int i = 0; i < data.Length; i++)
             {
-                sb.Append(retVal[i].ToString("x2"));
+                sBuilder.Append(data[i].ToString("x2"));
             }
-            return sb.ToString();  
-        }
+            return sBuilder.ToString();
+        }       
 
         public static string GetUrl(HttpContext context, string file_path)
         {

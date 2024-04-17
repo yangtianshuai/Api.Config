@@ -1,5 +1,7 @@
 ﻿using Api.Config.Setting;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
 
 namespace Api.Config
 {
@@ -12,8 +14,10 @@ namespace Api.Config
         /// </summary>
         /// <param name="services"></param>
         /// <returns></returns>
-        public static IServiceCollection AddCors2(this IServiceCollection services)
+        [Obsolete("已过期的旧方法，推荐使用AddHttpCors")]
+        public static void AddCors2(this IServiceCollection services)
         {
+            var item = new CorsItem();
             var allowOrigins = AppSetting.GetSetting("AllowOrigins");
             string[] origins;
             if (string.IsNullOrEmpty(allowOrigins))
@@ -28,6 +32,7 @@ namespace Api.Config
             {
                 origins = new string[] { "*" };
             }
+            item.Origins = new List<string>(origins);
 
 
             var allowMethods = AppSetting.GetSetting("AllowMethods");
@@ -45,18 +50,107 @@ namespace Api.Config
                 methods = new string[] { "*" };
             }
 
-            //添加跨域解决方案
-            services.AddCors(options =>
+            item.Methods = new List<string>(methods);
+            item.PolicyName = "any";
+            //添加跨域解决方案           
+            AddHttpCors(services, config =>
             {
-                options.AddPolicy("any", builder =>
-                {
-                    builder.WithOrigins(origins)
-                    .WithMethods(methods)
-                    .AllowAnyHeader()
-                    .AllowCredentials();//指定处理cookie
-                });
+                config.Add(item);
             });
-            return services;
-        }         
+        }
+
+        /// <summary>
+        /// 添加Cors跨域方案
+        /// 开启安全验证时，需要配置AllowOrigins
+        /// 允许配置AllowMethods
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static void AddHttpCors(this IServiceCollection services, Action<CorsConfig> action = null)
+        {            
+            if (action == null)
+            {
+                //添加跨域解决方案
+                services.AddCors(options =>
+                {
+                    options.AddPolicy("any", builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                    });
+                });
+            }
+            else
+            {
+                var config = new CorsConfig();
+                action(config);
+
+                services.AddCors(options =>
+                {
+                    foreach(var item in config.Items())
+                    {
+                        options.AddPolicy(item.PolicyName, builder =>
+                        {
+                            if(item.Origins == null || item.Origins.Count == 0)
+                            {
+                                builder.AllowAnyOrigin();
+                            }
+                            else
+                            {
+                                builder.WithOrigins(item.Origins.ToArray());
+                            }
+
+                            if (item.Methods == null || item.Methods.Count == 0)
+                            {
+                                builder.AllowAnyMethod();
+                            }
+                            else
+                            {
+                                builder.WithOrigins(item.Methods.ToArray());
+                            }
+                            if (item.Headers == null || item.Headers.Count == 0)
+                            {
+                                builder.AllowAnyHeader();
+                            }
+                            else
+                            {
+                                builder.WithHeaders(item.Headers.ToArray());
+                            }
+
+                            builder.AllowCredentials();
+                        });
+                    }                    
+                });
+            }
+        }
+    }
+
+    public class CorsConfig
+    {
+        private List<CorsItem> items;
+        public CorsConfig()
+        {
+            items = new List<CorsItem>();
+        }
+
+        public void Add(CorsItem item)
+        {
+            items.Add(item);
+        }
+
+        internal List<CorsItem> Items()
+        {
+            return items;
+        }
+    }
+
+    public class CorsItem
+    {
+        public string PolicyName { get; set; }
+        public List<string> Origins { get; set; }
+        public List<string> Methods { get; set; }
+        public List<string> Headers { get; set; }
     }
 }

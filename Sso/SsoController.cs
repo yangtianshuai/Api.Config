@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Api.Config.Filter;
+using Microsoft.AspNetCore.Mvc;
 using SSO.Client;
 using System.Net;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace Api.Config.Sso
         public SsoController(SsoOptions options)
         {
             _options = options;
-        }
+        }        
 
         [HttpGet("user/logout"),NoAuthorization]
         public async Task<IActionResult> Logout(string ticket)
