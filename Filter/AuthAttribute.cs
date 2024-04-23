@@ -43,6 +43,7 @@ namespace Api.Config
                 if (hosts.Split(',').Contains(ClientIp))
                 {
                     WhiteListContain = true;
+                    return;
                 }
             }
             AccessTokens = AppSetting.GetSetting<List<string>>("AccessToken");
@@ -52,6 +53,7 @@ namespace Api.Config
                 if (AccessTokens.Contains(access_token))
                 {
                     WhiteListContain = true;
+                    return;
                 }
             }
             

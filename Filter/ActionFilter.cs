@@ -36,10 +36,9 @@ namespace Api.Config
         {
             var domains = AppSetting.GetSetting<string[]>("FrameDomains");
             if (domains != null && domains.Length > 0)
-            {
-                var domain_join = string.Join(" ", domains);
-                context.HttpContext.Response.AddHeader("X-Frame-Options", "ALLOW-FROM " + domain_join);
-                context.HttpContext.Response.AddHeader("Content-Security-Policy", "frame-ancestors " + domain_join);
+            {                
+                context.HttpContext.Response.AddHeader("X-Frame-Options", "ALLOW-FROM " + string.Join(" ", domains.Where(t => t.Contains("http"))));
+                context.HttpContext.Response.AddHeader("Content-Security-Policy", "frame-ancestors " + string.Join(" ", domains.Where(t => !t.Contains("http"))));
             }
             watch.Stop();
             try
